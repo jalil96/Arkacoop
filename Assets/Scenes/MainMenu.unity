@@ -1191,11 +1191,11 @@ RectTransform:
   m_Father: {fileID: 395023549}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 174, y: -352.83}
-  m_SizeDelta: {x: 280.41, y: 86.4045}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -85.79498, y: 0.79776}
+  m_SizeDelta: {x: 280.41003, y: 86.40451}
+  m_Pivot: {x: 1, y: 0}
 --- !u!114 &709704154
 MonoBehaviour:
   m_ObjectHideFlags: 0

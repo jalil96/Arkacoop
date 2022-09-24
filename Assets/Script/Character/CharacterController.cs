@@ -15,6 +15,7 @@ public class CharacterController : MonoBehaviourPun
     {
         if (!photonView.IsMine) Destroy(this);
         _model = GetComponent<CharacterModel>();
+        _model.Init(_vertical, _flip);
     }
 
     private void Update()
@@ -22,7 +23,7 @@ public class CharacterController : MonoBehaviourPun
 
         var inputDirection = _vertical ? Input.GetAxisRaw("Vertical") : Input.GetAxisRaw("Horizontal");
         inputDirection *= _flip ? -1 : 1;
-        _model.Move(new Vector2(inputDirection, 0), _vertical);
+        _model.Move(new Vector2(inputDirection, 0));
         // _model.Move(vertical ? new Vector2(0, inputDirection) : new Vector2(inputDirection, 0), vertical);
 
     }

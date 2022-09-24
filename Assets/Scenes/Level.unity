@@ -265,6 +265,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 226839385}
     m_Modifications:
+    - target: {fileID: -8706037891446372775, guid: 5b7c63b1f4107a04aa0c0aaaebbd2e62, type: 3}
+      propertyPath: sceneViewId
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 4390971713177604192, guid: 5b7c63b1f4107a04aa0c0aaaebbd2e62, type: 3}
       propertyPath: m_Name
       value: SpawnUp
@@ -346,6 +350,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 226839385}
     m_Modifications:
+    - target: {fileID: -8706037891446372775, guid: 5b7c63b1f4107a04aa0c0aaaebbd2e62, type: 3}
+      propertyPath: sceneViewId
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 4390971713177604192, guid: 5b7c63b1f4107a04aa0c0aaaebbd2e62, type: 3}
       propertyPath: m_Name
       value: SpawnDown
@@ -505,6 +513,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 226839385}
     m_Modifications:
+    - target: {fileID: -8706037891446372775, guid: 5b7c63b1f4107a04aa0c0aaaebbd2e62, type: 3}
+      propertyPath: sceneViewId
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4390971713177604192, guid: 5b7c63b1f4107a04aa0c0aaaebbd2e62, type: 3}
       propertyPath: m_Name
       value: SpawnLeft
@@ -582,6 +594,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 226839385}
     m_Modifications:
+    - target: {fileID: -8706037891446372775, guid: 5b7c63b1f4107a04aa0c0aaaebbd2e62, type: 3}
+      propertyPath: sceneViewId
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4390971713177604192, guid: 5b7c63b1f4107a04aa0c0aaaebbd2e62, type: 3}
       propertyPath: m_Name
       value: SpawnRight

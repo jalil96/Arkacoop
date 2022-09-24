@@ -15,7 +15,6 @@ public class CharacterController : MonoBehaviourPun
     {
         if (!photonView.IsMine) Destroy(this);
         _model = GetComponent<CharacterModel>();
-        _model.Init(_vertical, _flip);
     }
 
     private void Update()
@@ -36,5 +35,6 @@ public class CharacterController : MonoBehaviourPun
     public void SetVertical(bool vertical)
     {
         _vertical = vertical;
+        _model.Init(_vertical);
     }
 }

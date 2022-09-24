@@ -15,15 +15,12 @@ public class CharacterModel : MonoBehaviourPun
     private float _spriteOffset;
 
     private bool _vertical;
-    private bool _flip;
     
     public bool Vertical => _vertical;
-    public bool Flip => _flip;
     
-    public void Init(bool vertical, bool flip)
+    public void Init(bool vertical)
     {
         _vertical = vertical;
-        _flip = flip;
     }
     
     public void Move(Vector2 direction)

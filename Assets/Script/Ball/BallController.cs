@@ -24,7 +24,7 @@ public class BallController : MonoBehaviourPun
         var character = col.gameObject.GetComponent<CharacterModel>();
         if (character != null && character != _lastCollision)
         {
-            _ballModel.ChangeDirection(character.Vertical, character.Flip);
+            _ballModel.ChangeDirection(character.Vertical);
             _lastCollision = character;
         }
     }

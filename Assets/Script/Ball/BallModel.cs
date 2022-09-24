@@ -13,7 +13,7 @@ public class BallModel : MonoBehaviour
 
     public void InitDirection()
     {
-        _direction = Quaternion.Euler(0, 0, UnityEngine.Random.Range(0, 360)) * Vector2.up;
+        _direction = Quaternion.Euler(0, 0, Random.Range(0, 360)) * Vector2.up;
         _direction = _direction.normalized;
     }
     
@@ -22,33 +22,8 @@ public class BallModel : MonoBehaviour
         _rigidbody.velocity = _direction * _speed;
     }
     
-    public void ChangeDirection(bool vertical, bool flip)
+    public void ChangeDirection(bool vertical)
     {
-
-        if (flip && vertical)
-        {
-            _direction = new Vector2(_direction.x , _direction.y);
-        } 
-        else if (!flip && vertical)
-        {
-            _direction = new Vector2(_direction.x * -1, _direction.y);   
-        }
-        else if (flip && !vertical)
-        {
-            _direction = new Vector2(_direction.x, _direction.y);
-        }
-        else 
-        {
-            _direction = new Vector2(_direction.x, _direction.y * -1);
-        }
-        
-        // if (flip)
-        // {
-        //     _direction = new Vector2(vertical ? -1 : 1 * _direction.x, -1 * _direction.y);
-        // }
-        // else
-        // {
-        //     _direction = new Vector2(vertical ? -1 : 1 * _direction.x, _direction.y);
-        // }
+        _direction = vertical ? new Vector2(_direction.x * -1, _direction.y) : new Vector2(_direction.x, _direction.y * -1);
     }
 }

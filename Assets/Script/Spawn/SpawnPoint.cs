@@ -30,14 +30,14 @@ public class SpawnPoint : MonoBehaviourPun
     [PunRPC]
     public void UpdateOccupied(bool occupied)
     {
-        Debug.Log($"Updating spawnpoint {photonView.ViewID} for player {PhotonNetwork.LocalPlayer.NickName}, sending value {occupied}");
+        //Debug.Log($"Updating spawnpoint {photonView.ViewID} for player {PhotonNetwork.LocalPlayer.NickName}, sending value {occupied}");
         _occupied = occupied;
     }
 
     [PunRPC]
     public void RequestOccupied(Player player)
     {
-        Debug.Log($"Requested update spawnpoint {photonView.ViewID} for player {player.NickName}, sending value {_occupied}");
+        //Debug.Log($"Requested update spawnpoint {photonView.ViewID} for player {player.NickName}, sending value {_occupied}");
         photonView.RPC(nameof(UpdateOccupied), player, _occupied);
     }
 }

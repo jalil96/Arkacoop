@@ -16,23 +16,18 @@ public class CharacterInstantiator : MonoBehaviourPunCallbacks
     
     private void Start()
     {
-
-        if (!PhotonNetwork.IsMasterClient) return;
-        
-
+        if (!PhotonNetwork.IsMasterClient) return; // Only instantiate character if I'm the MasterClient
+        var spawn = GetAvailableSpawnPoint();
+        InstantiateCharacter(spawn);
     }
-    
-    
-     
-     
+
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         Debug.Log($"NewPlayer entered: {newPlayer.NickName}");
-        if (!PhotonNetwork.IsMasterClient) return;
-        var spawn = _spawns.First(point => !point.Occupied);
+        if (!PhotonNetwork.IsMasterClient) return; // Only the master sends where the new player is going to spawn
+        var spawn = GetAvailableSpawnPoint();
         var spawnIndex = _spawns.IndexOf(spawn);
         Debug.Log($"Executing {nameof(SpawnCharacter)} for player {newPlayer.NickName} spawn index {spawnIndex}");
-          
         photonView.RPC(nameof(SpawnCharacter), newPlayer, spawnIndex);
     }
 
@@ -40,7 +35,16 @@ public class CharacterInstantiator : MonoBehaviourPunCallbacks
     private void SpawnCharacter(int spawnIndex)
     {
         var spawn = _spawns[spawnIndex];
-          
+        InstantiateCharacter(spawn);
+    }
+
+    private SpawnPoint GetAvailableSpawnPoint()
+    {
+        return _spawns.First(point => !point.Occupied);
+    }
+
+    private void InstantiateCharacter(SpawnPoint spawn)
+    {
         var character = PhotonNetwork.Instantiate("Character", spawn.transform.position, spawn.transform.rotation).GetComponentInChildren<CharacterController>();
     
         character.SetFlip(spawn.Flip);

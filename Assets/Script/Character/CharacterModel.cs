@@ -27,7 +27,6 @@ public class CharacterModel : MonoBehaviourPun
     {
         direction = direction.normalized * (_speed * Time.deltaTime);
         
-        
         var newPosition = transform.localPosition + new Vector3(direction.x, direction.y);
 
         _spriteOffset = _vertical ? _sprite.bounds.size.y / 2 : _sprite.bounds.size.x / 2;
@@ -39,4 +38,30 @@ public class CharacterModel : MonoBehaviourPun
         // transform.Translate(direction.x, direction.y, transform.position.z);
     }
 
+    public Vector2 GetTopLeft()
+    {
+        return _sprite.transform.TransformPoint(new Vector3(_sprite.sprite.bounds.min.x, _sprite.sprite.bounds.max.y, 0));
+    }
+
+    public Vector2 GetTopRight()
+    {
+        return _sprite.transform.TransformPoint(_sprite.sprite.bounds.max);
+    }
+
+    public Vector2 GetTopCenter()
+    {
+        return Vector2.Lerp(GetTopLeft(), GetTopRight(), .5f);
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(GetTopLeft(), .1f);
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(GetTopRight(), .1f);
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawSphere(GetTopCenter(), .1f);
+
+    }
+    
 }

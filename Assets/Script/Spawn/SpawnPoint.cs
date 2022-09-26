@@ -12,7 +12,7 @@ public class SpawnPoint : MonoBehaviourPun
 
     private void Awake()
     {
-        Debug.Log($"Spawnpoint: {photonView.ViewID} is mine: {photonView.IsMine}");
+        // Debug.Log($"Spawnpoint: {photonView.ViewID} is mine: {photonView.IsMine}");
         if (photonView.IsMine) return;
         photonView.RPC(nameof(RequestOccupied), photonView.Owner, PhotonNetwork.LocalPlayer);
     }

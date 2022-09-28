@@ -4,7 +4,7 @@ using Photon.Pun;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 
-public class BrickModel : MonoBehaviourPun
+public class BrickModel : MonoBehaviourPun, ICollisionable
 {
     [SerializeField] private int maxHits;
     [SerializeField] private int _hits;

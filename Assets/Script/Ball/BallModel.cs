@@ -28,8 +28,8 @@ public class BallModel : MonoBehaviour
     {
         //_direction = vertical ? new Vector2(_direction.x * -1, _direction.y) : new Vector2(_direction.x, _direction.y * -1);
         // Debug.Log($"Direction before change {_direction}");
-        
-        _direction = Vector2.Reflect(_direction, col.normal);
+
+        _direction = angle == 0 ? Vector2.Reflect(_direction, col.normal) : col.normal; //
 
         // Debug.Log($"Direction after change {_direction}");
         

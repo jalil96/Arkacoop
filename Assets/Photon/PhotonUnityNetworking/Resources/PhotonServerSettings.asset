@@ -44,6 +44,8 @@ MonoBehaviour:
   - GetAvailableSpawnPoint
   - SpawnCharacter
   - UpdateHits
+  - UpdateActive
+  - RequestActive
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

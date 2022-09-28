@@ -9,8 +9,9 @@ public class SpawnPoint : MonoBehaviourPun
     [SerializeField] private bool _flip;
     [SerializeField] private bool _vertical;
     [SerializeField] private bool _occupied;
+    [SerializeField] private WallController _wallController;
 
-    private void Awake()
+    private void Start()
     {
         // Debug.Log($"Spawnpoint: {photonView.ViewID} is mine: {photonView.IsMine}");
         if (photonView.IsMine) return;
@@ -24,6 +25,7 @@ public class SpawnPoint : MonoBehaviourPun
     public void SetOccupied(bool occupied)
     {
         _occupied = occupied;
+        _wallController.Activate(!_occupied);
         photonView.RPC(nameof(UpdateOccupied), RpcTarget.OthersBuffered, _occupied);
     }
 

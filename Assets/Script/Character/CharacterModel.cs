@@ -2,7 +2,7 @@ using System;
 using Photon.Pun;
 using UnityEngine;
 
-public class CharacterModel : MonoBehaviourPun
+public class CharacterModel : MonoBehaviourPun, ICollisionable
 {
     [SerializeField] private float _speed;
     

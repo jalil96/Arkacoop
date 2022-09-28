@@ -100,8 +100,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ddc4b5af2ac4320ba0e718eedcb8712, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _minBounceAngle: 0
-  _maxBounceAngle: 30
+  _minBounceAngle: 5
+  _maxBounceAngle: 45
 --- !u!114 &2664592978094690309
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -130,13 +130,13 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!58 &1575987115862026472
 CircleCollider2D:
   m_ObjectHideFlags: 0

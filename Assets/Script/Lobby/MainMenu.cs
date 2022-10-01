@@ -14,10 +14,10 @@ public class MainMenu : MonoBehaviourPunCallbacks
     private const int MINIMUM_PLAYERS_FOR_GAME = 2;
 
     [Header("Main Settings")]
-    //[SerializeField] private int maxPlayers = 4;
     [SerializeField] private Text txtNickname;
     [SerializeField] private TextMeshProUGUI statusText;
     [SerializeField] private string Level = "Level";
+    [SerializeField] private Button quitButton;
 
     [Header("Logging")]
     [SerializeField] private Panel loggingPanel;
@@ -59,6 +59,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
     private List<PlayerWaitigList> playerButtons = new List<PlayerWaitigList>();
 
     private Player[] currentPlayerList;
+    private string nickname;
 
 
     public void Awake()
@@ -67,7 +68,8 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
         //Start settings
         txtNickname.gameObject.SetActive(false);
-        
+        quitButton.onClick.AddListener(OnQuitButton);
+
         //GeneratePanels
         GenerateWaitingPanel();
         GenerateChoosingPanel();
@@ -83,9 +85,14 @@ public class MainMenu : MonoBehaviourPunCallbacks
         allPanels.Add(kickedPanel);
         allPanels.Add(loadingSymbolPanel);
 
-        //if (PhotonNetwork.NickName != null)
-        //    ChangePanel(choosePanels);
-        //else
+        RestartMenu();
+    }
+
+    private void RestartMenu()
+    {
+        if (PhotonNetwork.IsConnectedAndReady)
+            ChangePanel(choosePanels);
+        else
             ChangePanel(loggingPanel);
     }
 
@@ -147,19 +154,25 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F1))
-        {
-            roomNameInput.text = DEFAULT_ROOM_NAME;
-            nickNameInput.text = DEFAULT_NICK_NAME;
+        //if (Input.GetKeyDown(KeyCode.F1))
+        //{
+        //    roomNameInput.text = DEFAULT_ROOM_NAME;
+        //    nickNameInput.text = DEFAULT_NICK_NAME;
 
-            statusText.text = "Connecting to Master";
-            PhotonNetwork.ConnectUsingSettings();
-        }
+        //    statusText.text = "Connecting to Master";
+        //    PhotonNetwork.ConnectUsingSettings();
+        //}
 
-        if (Input.GetKeyDown(KeyCode.F2))
+        //if (Input.GetKeyDown(KeyCode.F2))
+        //{
+        //    nickNameInput.text = DEFAULT_NICK_NAME;
+        //    PhotonNetwork.ConnectUsingSettings();
+        //}
+
+        if (Input.GetKeyDown(KeyCode.F3))
         {
-            nickNameInput.text = DEFAULT_NICK_NAME;
-            PhotonNetwork.ConnectUsingSettings();
+            if (!PhotonNetwork.InRoom) return;
+            PhotonNetwork.LeaveRoom(false);
         }
     }
 
@@ -180,6 +193,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
 
         PhotonNetwork.NickName = nickNameInput.text;
+        nickname = nickNameInput.text;
         txtNickname.text = nickNameInput.text;
 
         txtNickname.gameObject.SetActive(true);
@@ -230,7 +244,6 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
     public override void OnCreatedRoom()
     {
-        ChangePanel(waitignLobbyPanel);
         statusText.text = "Created Room";
     }
 
@@ -253,14 +266,13 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
+        print("player enetered room");
         RefreshPlayerList();
+        //startGameButton.interactable = HasEnoughPlayers();
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        base.OnPlayerLeftRoom(otherPlayer);
-        print("otherPlayer left the room");
-        print(otherPlayer.NickName);
         RefreshPlayerList();
     }
 
@@ -268,10 +280,19 @@ public class MainMenu : MonoBehaviourPunCallbacks
     {
         ChangePanel(choosePanels);
     }
+
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        base.OnDisconnected(cause);
+        ChangePanel(kickedPanel);
+        print(PhotonNetwork.NickName);
+        startGameButton.interactable = HasEnoughPlayers();
+    }
     #endregion
 
     public void RefreshPlayerList()
     {
+        print("Lets refresh the players list ");
         currentNumberPlayersTxt.text = $"{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}";
 
         currentPlayerList = PhotonNetwork.PlayerList;
@@ -288,7 +309,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
             playerButtons[i].gameObject.SetActive(true);
             playerButtons[i].nameTxt.text = currentPlayer.NickName;
-            playerButtons[i].numberTxt.text = $"{currentPlayer.ActorNumber} - ";
+            playerButtons[i].numberTxt.text = $"{i + 1} - ";
 
             if (PhotonNetwork.IsMasterClient && !currentPlayer.IsMasterClient)
             {
@@ -302,7 +323,8 @@ public class MainMenu : MonoBehaviourPunCallbacks
             }
         }
 
-        startGameButton.interactable = HasEnoughPlayers();
+        if (PhotonNetwork.IsMasterClient)
+            startGameButton.interactable = HasEnoughPlayers();
     }
 
     private bool HasEnoughPlayers()
@@ -320,16 +342,10 @@ public class MainMenu : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        photonView.RPC("KickPlayer", newPlayer);
+        PhotonNetwork.CloseConnection(newPlayer);
         startGameButton.interactable = HasEnoughPlayers();
     }
 
-    [PunRPC]
-    private void KickPlayer()
-    {
-        PhotonNetwork.LeaveRoom(false);
-        ChangePanel(kickedPanel);
-    }
 
     private void LeaveTheRoom()
     {
@@ -341,13 +357,19 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
             for (int i = currentPlayerList.Length - 1; i >= 0; i--)
             {
-                if(!currentPlayerList[i].IsMasterClient)
+                if (!currentPlayerList[i].IsMasterClient)
                     OnKickPlayer(currentPlayerList[i]);
             }
         }
 
         PhotonNetwork.LeaveRoom(false);
-        print(PhotonNetwork.NickName + " has left the room");
+        ChangePanel(choosePanels);
+    }
+
+    private void OnQuitButton()
+    {
+        PhotonNetwork.Disconnect();
+        Application.Quit();
     }
 
 }

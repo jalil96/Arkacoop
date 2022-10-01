@@ -38,9 +38,7 @@ public class BallController : MonoBehaviourPun
         var character = col.gameObject.GetComponent<CharacterModel>();
         if (character != null)
             angle = CalculateAngleFromCollision(character, col);
-        
-        if(angle > 0) Debug.Log("Collide with player!!");
-        
+
         if (_ballModel != null) _ballModel.ChangeDirection(col.contacts[0], angle);
         _lastCollision = col.collider;
     }

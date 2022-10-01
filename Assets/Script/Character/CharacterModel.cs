@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CharacterModel : MonoBehaviourPun, ICollisionable
 {
+    public Action OnDied = delegate { };
+    
     [SerializeField] private float _speed;
     
     [SerializeField] private Transform _boundaryLeft;
@@ -12,12 +14,14 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
     
     [SerializeField] private SpriteRenderer _sprite;
 
+    
     private float _spriteOffset;
 
     private bool _vertical;
+    private bool _dead;
     
     public bool Vertical => _vertical;
-    
+    public bool Dead => _dead;
     public void Init(bool vertical)
     {
         _vertical = vertical;
@@ -51,6 +55,20 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
     public Vector2 GetTopCenter()
     {
         return Vector2.Lerp(GetTopLeft(), GetTopRight(), .5f);
+    }
+
+    public void Die()
+    {
+        _dead = true;
+        photonView.RPC(nameof(UpdateDead), RpcTarget.All, _dead);
+        OnDied?.Invoke();
+    }
+
+    [PunRPC]
+    private void UpdateDead(bool dead)
+    {
+        _dead = dead;
+        gameObject.SetActive(!_dead);
     }
 
     private void OnDrawGizmos()

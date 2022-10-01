@@ -46,6 +46,11 @@ MonoBehaviour:
   - UpdateHits
   - UpdateActive
   - RequestActive
+  - ShowLoseScreen
+  - UpdateDead
+  - UpdateDestroyed
+  - ShowWinScreen
+  - UpdateHitsText
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

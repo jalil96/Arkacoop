@@ -11,9 +11,7 @@ public class CharacterInstantiator : MonoBehaviourPunCallbacks
 {
     // [SerializeField] private SpawnPoint _spawn;
     [SerializeField] private List<SpawnPoint> _spawns; // Temp to TEST
-    
-    
-    
+   
     private void Start()
     {
         if (!PhotonNetwork.IsMasterClient) return; // Only instantiate character if I'm the MasterClient
@@ -50,6 +48,7 @@ public class CharacterInstantiator : MonoBehaviourPunCallbacks
         character.SetFlip(spawn.Flip);
         character.SetVertical(spawn.Vertical);
 
+        character.SetSpawnPoint(spawn);
         spawn.SetOccupied(true);
     }
 }

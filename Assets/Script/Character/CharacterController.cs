@@ -8,6 +8,7 @@ public class CharacterController : MonoBehaviourPun
 {
     [SerializeField] private bool _vertical;
     [SerializeField] private bool _flip;
+    [SerializeField] private SpawnPoint _spawnPoint;
     
     private CharacterModel _model;
 
@@ -27,6 +28,11 @@ public class CharacterController : MonoBehaviourPun
 
     }
 
+    public void SetSpawnPoint(SpawnPoint spawnPoint)
+    {
+        _spawnPoint = spawnPoint;
+    }
+    
     public void SetFlip(bool flip)
     {
         _flip = flip;
@@ -36,5 +42,15 @@ public class CharacterController : MonoBehaviourPun
     {
         _vertical = vertical;
         _model.Init(_vertical);
+    }
+
+    private void OnTriggerEnter2D(Collider2D col)
+    {
+        var ball = col.gameObject.GetComponent<BallModel>();
+        if (ball != null)
+        {
+            _spawnPoint.SetOccupied(false);
+            _model.Die();
+        }
     }
 }

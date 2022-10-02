@@ -30,7 +30,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
     [SerializeField] private Panel joiningRoomsWaitPanel;
 
     [Header("WaitingToJoinRoom")]
-    [SerializeField] private Button cancelJoinButton;
+    [SerializeField] private float timeOutSearch = 10f;
 
     [Header("Logging")]
     [SerializeField] private TMP_InputField nickNameInput;
@@ -64,13 +64,15 @@ public class MainMenu : MonoBehaviourPunCallbacks
     private int _maxPlayers;
     private List<Panel> allPanels = new List<Panel>();
     private List<PlayerWaitigList> playerButtons = new List<PlayerWaitigList>();
+    private Dictionary<string, int> playerNames = new Dictionary<string, int>(); 
 
     private Player[] currentPlayerList;
     private MenuPlayerView playerView;
-    private bool wasKicked;
 
-    private bool skipEverything;
-    private Dictionary<string, int> playerNames = new Dictionary<string, int>(); 
+    private bool wasKicked;
+    private bool skipEverything; //for cheating the login
+    private bool searchingRandomRoom;
+    private float timeOutSearchTimer;
 
     public void Awake()
     {
@@ -83,6 +85,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
         GenerateWaitingPanel();
         GenerateChoosingPanel();
         GenerateCreateRoomPanel();
+        GenerateWaitJoinningRoomPanel();
         logInButton.onClick.AddListener(LogInUser);
         kickedOutConfirmButton.onClick.AddListener(() => { ChangePanel(choosePanels); wasKicked = false; });
 
@@ -149,6 +152,9 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
     private void GenerateCreateRoomPanel()
     {
+        maxPlayersSlider.maxValue = DEFAULT_MAX_PLAYERS;
+        maxPlayersSlider.minValue = MINIMUM_PLAYERS_FOR_GAME;
+
         goBackToChooseButton.onClick.AddListener(() => ChangePanel(choosePanels));
         maxPlayersSlider.onValueChanged.AddListener(delegate { ValueChangeCheck(); });
 
@@ -163,14 +169,23 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
     private void GenerateWaitJoinningRoomPanel()
     {
-        //joiningRoomsWaitPanel.OnOpen = ;
+        joiningRoomsWaitPanel.OnOpen += OnOpen;
+        joiningRoomsWaitPanel.OnClose += OnClose;
 
-        cancelJoinButton.onClick.AddListener(CancelSearchForRooms);
-
-        void CancelSearchForRooms()
+        void OnOpen()
         {
-            SetStatus("Canceling Search");
-            //TODO jess implement a cancel search!;
+            SetStatus("Searching for rooms");
+
+            searchingRandomRoom = true;
+            timeOutSearchTimer = timeOutSearch;
+        }
+
+        void OnClose()
+        {
+            SetStatus("No rooms found");
+
+            searchingRandomRoom = false;
+            timeOutSearchTimer = 0f;
         }
     }
     #endregion
@@ -179,6 +194,20 @@ public class MainMenu : MonoBehaviourPunCallbacks
     {
         if (Input.GetKeyDown(KeyCode.F1))
             QuickMatchCheat();
+
+        if (joiningRoomsWaitPanel.IsOpen)
+        {
+            if (searchingRandomRoom)
+            {
+                timeOutSearchTimer -= Time.deltaTime;
+                if (timeOutSearchTimer <= 0)
+                {
+                    searchingRandomRoom = false;
+                    if (PhotonNetwork.InRoom) return;
+                    ChangePanel(choosePanels);
+                }
+            }
+        }
     }
 
     private void QuickMatchCheat()
@@ -251,7 +280,6 @@ public class MainMenu : MonoBehaviourPunCallbacks
     }
     public void JoinRoom()
     {
-        SetStatus("Searching for a Room");
         PhotonNetwork.JoinRandomRoom();
         ChangePanel(joiningRoomsWaitPanel);
     }
@@ -308,6 +336,8 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
+        searchingRandomRoom = false;
+        timeOutSearchTimer = 0f;
         SetStatus("Joined Room");
         ChangePanel(waitignLobbyPanel);
     }
@@ -326,6 +356,11 @@ public class MainMenu : MonoBehaviourPunCallbacks
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         RefreshPlayerList();
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+
     }
 
     public override void OnLeftRoom()
@@ -456,6 +491,9 @@ public class MainMenu : MonoBehaviourPunCallbacks
         playerNames.Clear();
         skipEverything = false;
         wasKicked = false;
+        timeOutSearchTimer = 0f;
+        searchingRandomRoom = false;
+
     }
 
 }

@@ -15,6 +15,9 @@ public class PlayerData
 
 public class ScoreManager : MonoBehaviour
 {
+    private const string victoryMessage = "Victory";
+    private const string gameOverMessage = "Game Over";
+
     public PlayerScore playerScorePrefab;
     public GameObject playerListContainer;
     public Button mainMenuButton;
@@ -28,9 +31,12 @@ public class ScoreManager : MonoBehaviour
         playerScorePrefab.gameObject.SetActive(false);
     }
 
-    public void SetTitle(string title)
+    public void SetTitle(bool win)
     {
-        titleTxt.text = title;
+        if (win)
+            titleTxt.text = victoryMessage;
+        else
+            titleTxt.text = gameOverMessage;
     }
 
     public void SetPlayersPrefab(int quantityPlayer)

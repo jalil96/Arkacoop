@@ -51,6 +51,8 @@ MonoBehaviour:
   - UpdateDestroyed
   - ShowWinScreen
   - UpdateHitsText
+  - KickPlayer
+  - UpdatePlayerReference
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

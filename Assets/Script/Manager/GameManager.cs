@@ -34,6 +34,13 @@ public class GameManager : MonoBehaviourPunCallbacks
         Debug.Log("Player entered!!");
     }
 
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        // Leave because the master leaved
+        PhotonNetwork.LeaveRoom(false);
+        PhotonNetwork.LoadLevel("MainMenu");
+    }
+
     private void Update()
     {
         if (!PhotonNetwork.IsMasterClient) return;

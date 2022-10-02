@@ -21,10 +21,21 @@ public class MenuPlayerView : MonoBehaviourPun
         photonView.RPC("KickPlayer", newPlayer);
     }
 
+    public void OnLoadScene(Player newPlayer)
+    {
+        photonView.RPC("LoadSceneMaster", newPlayer);
+    }
+
     [PunRPC]
     private void KickPlayer()
     {
         print("I was kicked");
         mainMenu.KickedPlayer();
+    }
+
+    [PunRPC]
+    private void LoadSceneMaster()
+    {
+        PhotonNetwork.LoadLevel(mainMenu.Level);
     }
 }

@@ -18,7 +18,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
     [SerializeField] private TextMeshProUGUI statusText;
     [SerializeField] private Button quitButton;
     [SerializeField] private string statusPrefix = "Status: ";
-    [SerializeField] private string Level = "Level";
+    public string Level = "Level";
 
     [Header("All Panels")]
     [SerializeField] private Panel loggingPanel;
@@ -70,6 +70,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
     private bool wasKicked;
 
     private bool skipEverything;
+    private Dictionary<string, int> playerNames = new Dictionary<string, int>(); 
 
     public void Awake()
     {
@@ -169,6 +170,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
         void CancelSearchForRooms()
         {
             SetStatus("Canceling Search");
+            //TODO jess implement a cancel search!;
         }
     }
     #endregion
@@ -228,7 +230,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
         ChangePanel(loadingSymbolPanel);
     }
 
-    private void BaseCreateRoom(string roomName = "", byte maxPlayers = 2)
+    private void BaseCreateRoom(string roomName = "", byte maxPlayers = DEFAULT_MAX_PLAYERS)
     {
         if (string.IsNullOrEmpty(roomName) || string.IsNullOrWhiteSpace(roomName))
             roomName = DEFAULT_ROOM_NAME;
@@ -253,6 +255,23 @@ public class MainMenu : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinRandomRoom();
         ChangePanel(joiningRoomsWaitPanel);
     }
+
+    public void CheckNicknames(Player[] players)
+    {
+        playerNames.Clear();
+        for (int i = 0; i < players.Length; i++)
+        {
+            if (playerNames.TryGetValue(players[i].NickName, out int number))
+            {
+                players[i].NickName = $"{players[i].NickName}({number})";
+                number++;
+                playerNames[players[i].NickName] = number;
+            }
+            else
+                playerNames.Add(players[i].NickName, 1);
+        }
+    }
+
     #endregion
 
     #region Photon Callbacks
@@ -324,6 +343,8 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
         currentPlayerList = PhotonNetwork.PlayerList;
 
+        CheckNicknames(currentPlayerList);
+
         if (PhotonNetwork.IsMasterClient)
             startGameButton.interactable = HasEnoughPlayers();
 
@@ -368,7 +389,23 @@ public class MainMenu : MonoBehaviourPunCallbacks
     private void StartGame()
     {
         if (!PhotonNetwork.IsMasterClient) return;
+
+        PhotonNetwork.AutomaticallySyncScene = true;
+
+        currentPlayerList = PhotonNetwork.PlayerList;
+
+        for (int i = currentPlayerList.Length - 1; i >= 0; i--)
+        {
+            if (!currentPlayerList[i].IsMasterClient)
+                LoadScene(currentPlayerList[i]);
+        }
+
         PhotonNetwork.LoadLevel(Level);
+    }
+
+    private void LoadScene(Player newPlayer)
+    {
+        playerView.OnLoadScene(newPlayer);
     }
 
     private void OnKickPlayer(Player newPlayer)
@@ -412,6 +449,13 @@ public class MainMenu : MonoBehaviourPunCallbacks
         SetStatus("Disconnecting");
         PhotonNetwork.Disconnect();
         Application.Quit();
+    }
+
+    private void ClearData()
+    {
+        playerNames.Clear();
+        skipEverything = false;
+        wasKicked = false;
     }
 
 }

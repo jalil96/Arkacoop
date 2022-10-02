@@ -14,24 +14,29 @@ public class MainMenu : MonoBehaviourPunCallbacks
     private const int MINIMUM_PLAYERS_FOR_GAME = 2;
 
     [Header("Main Settings")]
-    //[SerializeField] private int maxPlayers = 4;
     [SerializeField] private Text txtNickname;
     [SerializeField] private TextMeshProUGUI statusText;
+    [SerializeField] private Button quitButton;
+    [SerializeField] private string statusPrefix = "Status: ";
     [SerializeField] private string Level = "Level";
 
-    [Header("Logging")]
+    [Header("All Panels")]
     [SerializeField] private Panel loggingPanel;
-    [SerializeField] private TMP_InputField nickNameInput;
-    [SerializeField] private Button logInButton;
+    [SerializeField] private Panel choosePanels;
+    [SerializeField] private Panel roomSettingPanel;
+    [SerializeField] private Panel waitignLobbyPanel;
+    [SerializeField] private Panel kickedPanel;
     [SerializeField] private Panel loadingSymbolPanel;
 
+    [Header("Logging")]
+    [SerializeField] private TMP_InputField nickNameInput;
+    [SerializeField] private Button logInButton;
+
     [Header("Choose")]
-    [SerializeField] private Panel choosePanels;
     [SerializeField] private Button newRoomButton;
     [SerializeField] private Button joinRoomButton;
 
     [Header("Room Settings")]
-    [SerializeField] private Panel roomSettingPanel;
     [SerializeField] private TMP_InputField roomNameInput;
     [SerializeField] private Slider maxPlayersSlider;
     [SerializeField] private Text txtMaxPlayersValue;
@@ -40,10 +45,9 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
     [Header("WaitingL Room")]
     [SerializeField] private string roomPrefix = "Room: ";
-    [SerializeField] private Panel waitignLobbyPanel;
+    [SerializeField] private PlayerWaitigList playerListPrefab;
     [SerializeField] private Text roomNameWaitingLobbyTxt;
     [SerializeField] private GameObject playerListContainer;
-    [SerializeField] private PlayerWaitigList playerListPrefab;
     [SerializeField] private GameObject waitingHostSpecialOptions;
     [SerializeField] private GameObject waitingNonHostOptions;
     [SerializeField] private Button startGameButton;
@@ -51,7 +55,6 @@ public class MainMenu : MonoBehaviourPunCallbacks
     [SerializeField] private Text currentNumberPlayersTxt;
 
     [Header("Prompts")]
-    [SerializeField] private Panel kickedPanel;
     [SerializeField] private Button kickedOutConfirmButton;
 
     private int _maxPlayers;
@@ -59,21 +62,22 @@ public class MainMenu : MonoBehaviourPunCallbacks
     private List<PlayerWaitigList> playerButtons = new List<PlayerWaitigList>();
 
     private Player[] currentPlayerList;
-
+    private MenuPlayerView playerView;
+    private bool wasKicked;
 
     public void Awake()
     {
         _maxPlayers = DEFAULT_MAX_PLAYERS;
-
-        //Start settings
+        playerView = GetComponent<MenuPlayerView>();
         txtNickname.gameObject.SetActive(false);
-        
+
         //GeneratePanels
         GenerateWaitingPanel();
         GenerateChoosingPanel();
         GenerateCreateRoomPanel();
         logInButton.onClick.AddListener(LogInUser);
-        kickedOutConfirmButton.onClick.AddListener(() => ChangePanel(choosePanels));
+        quitButton.onClick.AddListener(OnQuitButton);
+        kickedOutConfirmButton.onClick.AddListener(() => { ChangePanel(choosePanels); wasKicked = false; });
 
         //Set all panels
         allPanels.Add(loggingPanel);
@@ -83,9 +87,14 @@ public class MainMenu : MonoBehaviourPunCallbacks
         allPanels.Add(kickedPanel);
         allPanels.Add(loadingSymbolPanel);
 
-        //if (PhotonNetwork.NickName != null)
-        //    ChangePanel(choosePanels);
-        //else
+        RestartMenu();
+    }
+
+    public void RestartMenu()
+    {
+        if (PhotonNetwork.IsConnectedAndReady)
+            ChangePanel(choosePanels);
+        else
             ChangePanel(loggingPanel);
     }
 
@@ -147,19 +156,25 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F1))
-        {
-            roomNameInput.text = DEFAULT_ROOM_NAME;
-            nickNameInput.text = DEFAULT_NICK_NAME;
+        //if (Input.GetKeyDown(KeyCode.F1))
+        //{
+        //    roomNameInput.text = DEFAULT_ROOM_NAME;
+        //    nickNameInput.text = DEFAULT_NICK_NAME;
 
-            statusText.text = "Connecting to Master";
-            PhotonNetwork.ConnectUsingSettings();
-        }
+        //    statusText.text = "Connecting to Master";
+        //    PhotonNetwork.ConnectUsingSettings();
+        //}
 
-        if (Input.GetKeyDown(KeyCode.F2))
+        //if (Input.GetKeyDown(KeyCode.F2))
+        //{
+        //    nickNameInput.text = DEFAULT_NICK_NAME;
+        //    PhotonNetwork.ConnectUsingSettings();
+        //}
+
+        if (Input.GetKeyDown(KeyCode.F3))
         {
-            nickNameInput.text = DEFAULT_NICK_NAME;
-            PhotonNetwork.ConnectUsingSettings();
+            if (!PhotonNetwork.InRoom) return;
+            PhotonNetwork.LeaveRoom(false);
         }
     }
 
@@ -185,7 +200,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
         txtNickname.gameObject.SetActive(true);
         PhotonNetwork.ConnectUsingSettings();
         ChangePanel(loadingSymbolPanel);
-        statusText.text = "Status: Trying to Connect";
+        statusText.text = statusPrefix + "Trying to Connect";
     }
 
 
@@ -218,36 +233,37 @@ public class MainMenu : MonoBehaviourPunCallbacks
     #region Photon Callbacks
     public override void OnConnectedToMaster()
     {
-        statusText.text = "Connecting to Lobby";
+        statusText.text = statusPrefix + "Connecting to Lobby";
         PhotonNetwork.JoinLobby();
     }
 
     public override void OnJoinedLobby()
     {
-        ChangePanel(choosePanels);
-        statusText.text = "Connected to Lobby";
+        if (!wasKicked)
+            ChangePanel(choosePanels);
+
+        statusText.text = statusPrefix + "Connected to Lobby";
     }
 
     public override void OnCreatedRoom()
     {
-        ChangePanel(waitignLobbyPanel);
-        statusText.text = "Created Room";
+        statusText.text = statusPrefix + "Created Room";
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
-        statusText.text = "Created Room failed";
+        statusText.text = statusPrefix + "Created Room failed";
     }
 
     public override void OnJoinedRoom()
     {
-        statusText.text = "Joined Room";
+        statusText.text = statusPrefix + "Joined Room";
         ChangePanel(waitignLobbyPanel);
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
-        statusText.text = "Joined Room failed";
+        statusText.text = statusPrefix +"Joined Room failed";
         ChangePanel(choosePanels);
     }
 
@@ -258,15 +274,15 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        base.OnPlayerLeftRoom(otherPlayer);
-        print("otherPlayer left the room");
-        print(otherPlayer.NickName);
         RefreshPlayerList();
     }
 
     public override void OnLeftRoom()
     {
-        ChangePanel(choosePanels);
+        if(wasKicked)
+            ChangePanel(kickedPanel);
+        else
+            ChangePanel(choosePanels);
     }
     #endregion
 
@@ -276,19 +292,22 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
         currentPlayerList = PhotonNetwork.PlayerList;
 
+        if (PhotonNetwork.IsMasterClient)
+            startGameButton.interactable = HasEnoughPlayers();
+
         for (int i = 0; i < playerButtons.Count; i++)
         {
             bool overflow = (currentPlayerList.Length - 1) < i;
 
             playerButtons[i].gameObject.SetActive(!overflow);
 
-            if (overflow) return;
+            if (overflow) continue;
 
             Player currentPlayer = currentPlayerList[i];
 
             playerButtons[i].gameObject.SetActive(true);
             playerButtons[i].nameTxt.text = currentPlayer.NickName;
-            playerButtons[i].numberTxt.text = $"{currentPlayer.ActorNumber} - ";
+            playerButtons[i].numberTxt.text = $"{i + 1} - ";
 
             if (PhotonNetwork.IsMasterClient && !currentPlayer.IsMasterClient)
             {
@@ -301,18 +320,16 @@ public class MainMenu : MonoBehaviourPunCallbacks
                 playerButtons[i].kickButton.gameObject.SetActive(false);
             }
         }
-
-        startGameButton.interactable = HasEnoughPlayers();
     }
 
     private bool HasEnoughPlayers()
     {
-        print("Has enough players? " + (PhotonNetwork.CurrentRoom.PlayerCount >= MINIMUM_PLAYERS_FOR_GAME));
         return PhotonNetwork.CurrentRoom.PlayerCount >= MINIMUM_PLAYERS_FOR_GAME;
     }
 
     private void StartGame()
     {
+        if (!PhotonNetwork.IsMasterClient) return;
         PhotonNetwork.LoadLevel(Level);
     }
 
@@ -320,15 +337,14 @@ public class MainMenu : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        photonView.RPC("KickPlayer", newPlayer);
-        startGameButton.interactable = HasEnoughPlayers();
+        playerView.OnKickPlayer(newPlayer);
+        statusText.text = statusPrefix + "Being kicked";
     }
 
-    [PunRPC]
-    private void KickPlayer()
+    public void KickedPlayer()
     {
+        wasKicked = true;
         PhotonNetwork.LeaveRoom(false);
-        ChangePanel(kickedPanel);
     }
 
     private void LeaveTheRoom()
@@ -341,13 +357,23 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
             for (int i = currentPlayerList.Length - 1; i >= 0; i--)
             {
-                if(!currentPlayerList[i].IsMasterClient)
+                if (!currentPlayerList[i].IsMasterClient)
                     OnKickPlayer(currentPlayerList[i]);
             }
         }
 
         PhotonNetwork.LeaveRoom(false);
-        print(PhotonNetwork.NickName + " has left the room");
+        ChangePanel(choosePanels);
+    }
+
+    private void OnQuitButton()
+    {
+        if (PhotonNetwork.InRoom)
+            LeaveTheRoom();
+
+        statusText.text = statusPrefix + "Disconnecting";
+        PhotonNetwork.Disconnect();
+        Application.Quit();
     }
 
 }

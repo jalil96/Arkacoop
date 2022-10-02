@@ -13,15 +13,4 @@ public class BrickController : MonoBehaviourPun
         if (!photonView.IsMine) Destroy(this);
     }
 
-    private void OnCollisionEnter2D(Collision2D col)
-    {
-        
-        var ball = col.gameObject.GetComponent<BallModel>();
-        
-        if (ball != null)
-        {
-            Debug.Log("Collisioned with ball");
-            _brickModel.Damage(1); // Change to be the ball giving the damage?
-        }
-    }
 }

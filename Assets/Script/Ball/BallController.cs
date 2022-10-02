@@ -6,10 +6,11 @@ public class BallController : MonoBehaviourPun
 {
     [SerializeField] private float _minBounceAngle;
     [SerializeField] private float _maxBounceAngle;
+    [SerializeField] private int _pointsOnCollision = 50;
+    [SerializeField] private int _pointsOnBreak = 100;
     
     private BallModel _ballModel;
-    private Collider2D _lastCollision;
-
+    
     private void Awake()
     {
         if (!photonView.IsMine) Destroy(this);
@@ -29,7 +30,7 @@ public class BallController : MonoBehaviourPun
     private void OnCollisionEnter2D(Collision2D col)
     {
         if (!photonView.IsMine) return;
-        if (_lastCollision != null && col.collider == _lastCollision) return;
+        if (_ballModel.LastCollision != null && col.collider == _ballModel.LastCollision) return;
         var angle = 0f;
 
         var collisionable = col.gameObject.GetComponent<ICollisionable>();
@@ -37,10 +38,21 @@ public class BallController : MonoBehaviourPun
         
         var character = col.gameObject.GetComponent<CharacterModel>();
         if (character != null)
+        {
             angle = CalculateAngleFromCollision(character, col);
+            _ballModel.LastCharacterCollision = character;
+        }
 
+        var brick = col.gameObject.GetComponent<BrickModel>();
+        if (brick != null && _ballModel.HasLastCharacterCollision)
+        {
+            var points = brick.Hits == 1 ? _pointsOnBreak : _pointsOnCollision;
+            _ballModel.LastCharacterCollision.AddScore(points);
+            brick.Damage(1);
+        }
+        
         if (_ballModel != null) _ballModel.ChangeDirection(col.contacts[0], angle);
-        _lastCollision = col.collider;
+        _ballModel.LastCollision = col.collider;
     }
 
     private float CalculateAngleFromCollision(CharacterModel character, Collision2D col)

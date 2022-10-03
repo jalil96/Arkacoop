@@ -55,6 +55,15 @@ public class BallController : MonoBehaviourPun
         _ballModel.LastCollision = col.collider;
     }
 
+    private void OnTriggerEnter2D(Collider2D col)
+    {
+        var wallOfDeath = col.gameObject.GetComponent<CharacterModel>();
+        if (wallOfDeath)
+        {
+            _ballModel.Die();
+        }
+    }
+
     private float CalculateAngleFromCollision(CharacterModel character, Collision2D col)
     {
         var topLeft = character.GetTopLeft();

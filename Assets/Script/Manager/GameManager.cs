@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] private GameObject _loseScreen;
     [SerializeField] private GameObject _winScreen;
+    [SerializeField] private TimerController _timerController; 
     
     private List<CharacterModel> _characters = new List<CharacterModel>();
     private List<BrickModel> _bricks = new List<BrickModel>();
@@ -66,6 +67,8 @@ public class GameManager : MonoBehaviourPunCallbacks
             SetNewCharacter(character);
         }
         _activePlayers = _characters.Count();
+        
+        _timerController.StartTimer();
     }
 
     private void CharacterDied()
@@ -74,6 +77,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (_characters.All(character => character.Dead))
         {
             photonView.RPC(nameof(ShowLoseScreen), RpcTarget.All); // ShowLoseScreen();
+            _timerController.StopTimer();
         }
     }
 
@@ -83,6 +87,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (_bricks.All(brick => brick.Destroyed))
         {
             photonView.RPC(nameof(ShowWinScreen), RpcTarget.All);
+            _timerController.StopTimer();
         }
     }
     

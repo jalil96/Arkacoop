@@ -1,8 +1,9 @@
 ﻿using System;
+using Photon.Pun;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class BallModel : MonoBehaviour
+public class BallModel : MonoBehaviourPun
 {
     [SerializeField] private Rigidbody2D _rigidbody;
     [SerializeField] private float _speed;
@@ -13,6 +14,8 @@ public class BallModel : MonoBehaviour
     public bool HasLastCharacterCollision => LastCharacterCollision != null;
     
     private Vector2 _direction;
+    private bool _active = true;
+    
     
     private void Start()
     {
@@ -42,5 +45,17 @@ public class BallModel : MonoBehaviour
         _direction = _direction.Rotate(angle);
         
         // Debug.Log($"Direction before rotation {_direction} by angle: {angle}");
+    }
+
+    public void Die()
+    {
+        photonView.RPC(nameof(UpdateDie), RpcTarget.Others);
+        Destroy(gameObject);
+    }
+
+    [PunRPC]
+    private void UpdateDie()
+    {
+        Destroy(gameObject);
     }
 }

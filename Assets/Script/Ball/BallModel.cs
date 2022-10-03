@@ -6,6 +6,12 @@ public class BallModel : MonoBehaviour
 {
     [SerializeField] private Rigidbody2D _rigidbody;
     [SerializeField] private float _speed;
+    
+    public Collider2D LastCollision { get; set; }
+    public CharacterModel LastCharacterCollision { get; set; }
+
+    public bool HasLastCharacterCollision => LastCharacterCollision != null;
+    
     private Vector2 _direction;
     
     private void Start()

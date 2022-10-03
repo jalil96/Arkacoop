@@ -29,6 +29,14 @@ public class CharacterInstantiator : MonoBehaviourPunCallbacks
         photonView.RPC(nameof(SpawnCharacter), newPlayer, spawnIndex);
     }
 
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        Debug.Log($"Player: {otherPlayer.NickName} left the room!");
+        if(!PhotonNetwork.IsMasterClient) return;
+        var spawn = _spawns.Find((spawn) => spawn.PlayerReference.Equals(otherPlayer));
+        spawn.SetOccupied(false);
+    }
+    
     [PunRPC]
     private void SpawnCharacter(int spawnIndex)
     {
@@ -50,5 +58,6 @@ public class CharacterInstantiator : MonoBehaviourPunCallbacks
 
         character.SetSpawnPoint(spawn);
         spawn.SetOccupied(true);
+        spawn.SetPlayerReference(PhotonNetwork.LocalPlayer);
     }
 }

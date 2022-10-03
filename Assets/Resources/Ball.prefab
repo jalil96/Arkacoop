@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 1575987115862026472}
   - component: {fileID: 1817284136585058258}
   - component: {fileID: 7310016303631132935}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ball
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -102,6 +102,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _minBounceAngle: 5
   _maxBounceAngle: 45
+  _pointsOnCollision: 50
+  _pointsOnBreak: 100
 --- !u!114 &2664592978094690309
 MonoBehaviour:
   m_ObjectHideFlags: 0

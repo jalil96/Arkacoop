@@ -10,6 +10,7 @@ public class SpawnPoint : MonoBehaviourPun
     [SerializeField] private bool _vertical;
     [SerializeField] private bool _occupied;
     [SerializeField] private WallController _wallController;
+    [SerializeField] private Player _playerReference;
 
     private void Start()
     {
@@ -21,12 +22,25 @@ public class SpawnPoint : MonoBehaviourPun
     public bool Flip => _flip;
     public bool Vertical => _vertical;
     public bool Occupied => _occupied;
+    public Player PlayerReference => _playerReference;
 
     public void SetOccupied(bool occupied)
     {
         _occupied = occupied;
         _wallController.Activate(!_occupied);
         photonView.RPC(nameof(UpdateOccupied), RpcTarget.OthersBuffered, _occupied);
+    }
+
+    public void SetPlayerReference(Player player)
+    {
+        _playerReference = player;
+        photonView.RPC(nameof(UpdatePlayerReference), RpcTarget.OthersBuffered, _playerReference);
+    }
+
+    [PunRPC]
+    public void UpdatePlayerReference(Player player)
+    {
+        _playerReference = player;
     }
 
     [PunRPC]

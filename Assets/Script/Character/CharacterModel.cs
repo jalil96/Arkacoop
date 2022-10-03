@@ -14,14 +14,17 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
     
     [SerializeField] private SpriteRenderer _sprite;
 
-    
     private float _spriteOffset;
 
     private bool _vertical;
     private bool _dead;
+
+    private int _score;
     
     public bool Vertical => _vertical;
     public bool Dead => _dead;
+    public int Score => _score;
+    
     public void Init(bool vertical)
     {
         _vertical = vertical;
@@ -56,7 +59,13 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
     {
         return Vector2.Lerp(GetTopLeft(), GetTopRight(), .5f);
     }
-
+    
+    public void AddScore(int score)
+    {
+        _score += score;
+        photonView.RPC(nameof(UpdateScore), RpcTarget.Others, _score);
+    }
+    
     public void Die()
     {
         _dead = true;
@@ -64,6 +73,12 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
         OnDied?.Invoke();
     }
 
+    [PunRPC]
+    public void UpdateScore(int score)
+    {
+        _score = score;
+    }
+    
     [PunRPC]
     private void UpdateDead(bool dead)
     {

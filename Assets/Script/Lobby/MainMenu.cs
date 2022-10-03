@@ -18,7 +18,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
     [SerializeField] private TextMeshProUGUI statusText;
     [SerializeField] private Button quitButton;
     [SerializeField] private string statusPrefix = "Status: ";
-    [SerializeField] private string Level = "Level";
+    public string Level = "Level";
 
     [Header("All Panels")]
     [SerializeField] private Panel loggingPanel;
@@ -27,6 +27,10 @@ public class MainMenu : MonoBehaviourPunCallbacks
     [SerializeField] private Panel waitignLobbyPanel;
     [SerializeField] private Panel kickedPanel;
     [SerializeField] private Panel loadingSymbolPanel;
+    [SerializeField] private Panel joiningRoomsWaitPanel;
+
+    [Header("WaitingToJoinRoom")]
+    [SerializeField] private float timeOutSearch = 10f;
 
     [Header("Logging")]
     [SerializeField] private TMP_InputField nickNameInput;
@@ -60,23 +64,29 @@ public class MainMenu : MonoBehaviourPunCallbacks
     private int _maxPlayers;
     private List<Panel> allPanels = new List<Panel>();
     private List<PlayerWaitigList> playerButtons = new List<PlayerWaitigList>();
+    private Dictionary<string, int> playerNames = new Dictionary<string, int>(); 
 
     private Player[] currentPlayerList;
     private MenuPlayerView playerView;
+
     private bool wasKicked;
+    private bool skipEverything; //for cheating the login
+    private bool searchingRandomRoom;
+    private float timeOutSearchTimer;
 
     public void Awake()
     {
         _maxPlayers = DEFAULT_MAX_PLAYERS;
         playerView = GetComponent<MenuPlayerView>();
         txtNickname.gameObject.SetActive(false);
+        quitButton.onClick.AddListener(OnQuitButton);
 
         //GeneratePanels
         GenerateWaitingPanel();
         GenerateChoosingPanel();
         GenerateCreateRoomPanel();
+        GenerateWaitJoinningRoomPanel();
         logInButton.onClick.AddListener(LogInUser);
-        quitButton.onClick.AddListener(OnQuitButton);
         kickedOutConfirmButton.onClick.AddListener(() => { ChangePanel(choosePanels); wasKicked = false; });
 
         //Set all panels
@@ -86,6 +96,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
         allPanels.Add(waitignLobbyPanel);
         allPanels.Add(kickedPanel);
         allPanels.Add(loadingSymbolPanel);
+        allPanels.Add(joiningRoomsWaitPanel);
 
         RestartMenu();
     }
@@ -99,7 +110,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
     }
 
     #region GeneratingPanels
-    public void GenerateWaitingPanel()
+    private void GenerateWaitingPanel()
     {
         waitignLobbyPanel.OnOpen += OnOpen;
 
@@ -139,43 +150,74 @@ public class MainMenu : MonoBehaviourPunCallbacks
         }
     }
 
-    public void GenerateCreateRoomPanel()
+    private void GenerateCreateRoomPanel()
     {
+        maxPlayersSlider.maxValue = DEFAULT_MAX_PLAYERS;
+        maxPlayersSlider.minValue = MINIMUM_PLAYERS_FOR_GAME;
+
         goBackToChooseButton.onClick.AddListener(() => ChangePanel(choosePanels));
         maxPlayersSlider.onValueChanged.AddListener(delegate { ValueChangeCheck(); });
 
         createRoomButton.onClick.AddListener(CreateRoom);
     }
 
-    public void GenerateChoosingPanel()
+    private void GenerateChoosingPanel()
     {
         joinRoomButton.onClick.AddListener(JoinRoom);
         newRoomButton.onClick.AddListener(() => ChangePanel(roomSettingPanel));
+    }
+
+    private void GenerateWaitJoinningRoomPanel()
+    {
+        joiningRoomsWaitPanel.OnOpen += OnOpen;
+        joiningRoomsWaitPanel.OnClose += OnClose;
+
+        void OnOpen()
+        {
+            SetStatus("Searching for rooms");
+
+            searchingRandomRoom = true;
+            timeOutSearchTimer = timeOutSearch;
+        }
+
+        void OnClose()
+        {
+            SetStatus("No rooms found");
+
+            searchingRandomRoom = false;
+            timeOutSearchTimer = 0f;
+        }
     }
     #endregion
 
     private void Update()
     {
-        //if (Input.GetKeyDown(KeyCode.F1))
-        //{
-        //    roomNameInput.text = DEFAULT_ROOM_NAME;
-        //    nickNameInput.text = DEFAULT_NICK_NAME;
+        if (Input.GetKeyDown(KeyCode.F1))
+            QuickMatchCheat();
 
-        //    statusText.text = "Connecting to Master";
-        //    PhotonNetwork.ConnectUsingSettings();
-        //}
-
-        //if (Input.GetKeyDown(KeyCode.F2))
-        //{
-        //    nickNameInput.text = DEFAULT_NICK_NAME;
-        //    PhotonNetwork.ConnectUsingSettings();
-        //}
-
-        if (Input.GetKeyDown(KeyCode.F3))
+        if (joiningRoomsWaitPanel.IsOpen)
         {
-            if (!PhotonNetwork.InRoom) return;
-            PhotonNetwork.LeaveRoom(false);
+            if (searchingRandomRoom)
+            {
+                timeOutSearchTimer -= Time.deltaTime;
+                if (timeOutSearchTimer <= 0)
+                {
+                    searchingRandomRoom = false;
+                    if (PhotonNetwork.InRoom) return;
+                    ChangePanel(choosePanels);
+                }
+            }
         }
+    }
+
+    private void QuickMatchCheat()
+    {
+        ChangePanel(loadingSymbolPanel);
+        PhotonNetwork.NickName = DEFAULT_NICK_NAME;
+
+        PhotonNetwork.ConnectUsingSettings();
+
+        skipEverything = true;
     }
 
     public void ChangePanel(Panel panelToOpen)
@@ -189,10 +231,14 @@ public class MainMenu : MonoBehaviourPunCallbacks
         }
     }
 
+    private void SetStatus(string message)
+    {
+        statusText.text = statusPrefix + message;
+    }
+
     public void LogInUser()
     {
         if (string.IsNullOrEmpty(nickNameInput.text) || string.IsNullOrWhiteSpace(nickNameInput.text)) return;
-
 
         PhotonNetwork.NickName = nickNameInput.text;
         txtNickname.text = nickNameInput.text;
@@ -200,7 +246,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
         txtNickname.gameObject.SetActive(true);
         PhotonNetwork.ConnectUsingSettings();
         ChangePanel(loadingSymbolPanel);
-        statusText.text = statusPrefix + "Trying to Connect";
+        SetStatus("Trying to Connect");
     }
 
 
@@ -209,15 +255,24 @@ public class MainMenu : MonoBehaviourPunCallbacks
     {
         if (string.IsNullOrEmpty(roomNameInput.text) || string.IsNullOrWhiteSpace(roomNameInput.text)) return;
 
+        BaseCreateRoom(roomNameInput.text, (byte)maxPlayersSlider.value);
+        ChangePanel(loadingSymbolPanel);
+    }
+
+    private void BaseCreateRoom(string roomName = "", byte maxPlayers = DEFAULT_MAX_PLAYERS)
+    {
+        if (string.IsNullOrEmpty(roomName) || string.IsNullOrWhiteSpace(roomName))
+            roomName = DEFAULT_ROOM_NAME;
+
         RoomOptions options = new RoomOptions();
 
-        options.MaxPlayers = (byte)maxPlayersSlider.value;
+        options.MaxPlayers = maxPlayers;
         options.IsOpen = true;
         options.IsVisible = true;
 
-        PhotonNetwork.JoinOrCreateRoom(roomNameInput.text, options, TypedLobby.Default);
-        ChangePanel(loadingSymbolPanel);
+        PhotonNetwork.JoinOrCreateRoom(roomName, options, TypedLobby.Default);
     }
+
 
     public void ValueChangeCheck()
     {
@@ -226,44 +281,70 @@ public class MainMenu : MonoBehaviourPunCallbacks
     public void JoinRoom()
     {
         PhotonNetwork.JoinRandomRoom();
-        ChangePanel(loadingSymbolPanel);
+        ChangePanel(joiningRoomsWaitPanel);
     }
+
+    public void CheckNicknames(Player[] players)
+    {
+        playerNames.Clear();
+        for (int i = 0; i < players.Length; i++)
+        {
+            if (playerNames.TryGetValue(players[i].NickName, out int number))
+            {
+                players[i].NickName = $"{players[i].NickName}({number})";
+                number++;
+                playerNames[players[i].NickName] = number;
+            }
+            else
+                playerNames.Add(players[i].NickName, 1);
+        }
+    }
+
     #endregion
 
     #region Photon Callbacks
     public override void OnConnectedToMaster()
     {
-        statusText.text = statusPrefix + "Connecting to Lobby";
+        SetStatus("Connecting to Lobby");
         PhotonNetwork.JoinLobby();
     }
 
     public override void OnJoinedLobby()
     {
+        if (skipEverything)
+        {
+            BaseCreateRoom();
+            SetStatus("Getting Room");
+            return;
+        }
+
         if (!wasKicked)
             ChangePanel(choosePanels);
 
-        statusText.text = statusPrefix + "Connected to Lobby";
+        SetStatus("Connected to Lobby");
     }
 
     public override void OnCreatedRoom()
     {
-        statusText.text = statusPrefix + "Created Room";
+        SetStatus("Created Room");
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
-        statusText.text = statusPrefix + "Created Room failed";
+        SetStatus("Created Room failed");
     }
 
     public override void OnJoinedRoom()
     {
-        statusText.text = statusPrefix + "Joined Room";
+        searchingRandomRoom = false;
+        timeOutSearchTimer = 0f;
+        SetStatus("Joined Room");
         ChangePanel(waitignLobbyPanel);
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
-        statusText.text = statusPrefix +"Joined Room failed";
+        SetStatus("Joined Room failed");
         ChangePanel(choosePanels);
     }
 
@@ -275,6 +356,11 @@ public class MainMenu : MonoBehaviourPunCallbacks
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         RefreshPlayerList();
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+
     }
 
     public override void OnLeftRoom()
@@ -291,6 +377,8 @@ public class MainMenu : MonoBehaviourPunCallbacks
         currentNumberPlayersTxt.text = $"{PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}";
 
         currentPlayerList = PhotonNetwork.PlayerList;
+
+        CheckNicknames(currentPlayerList);
 
         if (PhotonNetwork.IsMasterClient)
             startGameButton.interactable = HasEnoughPlayers();
@@ -324,13 +412,35 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
     private bool HasEnoughPlayers()
     {
-        return PhotonNetwork.CurrentRoom.PlayerCount >= MINIMUM_PLAYERS_FOR_GAME;
+        bool hasEnough = PhotonNetwork.CurrentRoom.PlayerCount >= MINIMUM_PLAYERS_FOR_GAME;
+
+        if(hasEnough)
+            SetStatus("Ready to start");
+        else
+            SetStatus("Waiting for more players");
+        return hasEnough;
     }
 
     private void StartGame()
     {
         if (!PhotonNetwork.IsMasterClient) return;
+
+        PhotonNetwork.AutomaticallySyncScene = true;
+
+        currentPlayerList = PhotonNetwork.PlayerList;
+
+        for (int i = currentPlayerList.Length - 1; i >= 0; i--)
+        {
+            if (!currentPlayerList[i].IsMasterClient)
+                LoadScene(currentPlayerList[i]);
+        }
+
         PhotonNetwork.LoadLevel(Level);
+    }
+
+    private void LoadScene(Player newPlayer)
+    {
+        playerView.OnLoadScene(newPlayer);
     }
 
     private void OnKickPlayer(Player newPlayer)
@@ -338,7 +448,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.IsMasterClient) return;
 
         playerView.OnKickPlayer(newPlayer);
-        statusText.text = statusPrefix + "Being kicked";
+        SetStatus("Being kicked");
     }
 
     public void KickedPlayer()
@@ -371,9 +481,19 @@ public class MainMenu : MonoBehaviourPunCallbacks
         if (PhotonNetwork.InRoom)
             LeaveTheRoom();
 
-        statusText.text = statusPrefix + "Disconnecting";
+        SetStatus("Disconnecting");
         PhotonNetwork.Disconnect();
         Application.Quit();
+    }
+
+    private void ClearData()
+    {
+        playerNames.Clear();
+        skipEverything = false;
+        wasKicked = false;
+        timeOutSearchTimer = 0f;
+        searchingRandomRoom = false;
+
     }
 
 }

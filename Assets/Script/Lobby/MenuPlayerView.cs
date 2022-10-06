@@ -21,10 +21,10 @@ public class MenuPlayerView : MonoBehaviourPun
         photonView.RPC("KickPlayer", newPlayer);
     }
 
-    public void OnLoadScene(Player newPlayer)
-    {
-        photonView.RPC("LoadSceneMaster", newPlayer);
-    }
+    //public void OnLoadScene(Player newPlayer)
+    //{
+    //    photonView.RPC("LoadSceneMaster", newPlayer);
+    //}
 
     [PunRPC]
     private void KickPlayer()
@@ -33,9 +33,9 @@ public class MenuPlayerView : MonoBehaviourPun
         mainMenu.KickedPlayer();
     }
 
-    [PunRPC]
-    private void LoadSceneMaster()
-    {
-        PhotonNetwork.LoadLevel(mainMenu.Level);
-    }
+    //[PunRPC]
+    //private void LoadSceneMaster()
+    //{
+    //    PhotonNetwork.LoadLevel(mainMenu.Level);
+    //}
 }

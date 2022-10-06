@@ -68,6 +68,7 @@ public class MainMenu : MonoBehaviourPunCallbacks
 
     private Player[] currentPlayerList;
     private MenuPlayerView playerView;
+    private List<Room> bannedRooms = new List<Room>();
 
     private bool wasKicked;
     private bool skipEverything; //for cheating the login
@@ -80,6 +81,8 @@ public class MainMenu : MonoBehaviourPunCallbacks
         playerView = GetComponent<MenuPlayerView>();
         txtNickname.gameObject.SetActive(false);
         quitButton.onClick.AddListener(OnQuitButton);
+
+        PhotonNetwork.AutomaticallySyncScene = true;
 
         //GeneratePanels
         GenerateWaitingPanel();
@@ -300,6 +303,17 @@ public class MainMenu : MonoBehaviourPunCallbacks
         }
     }
 
+    private bool CheckIfRoomIsBanned(Room room)
+    {
+        return bannedRooms.Contains(room);
+    }
+
+    private void AddToBannedRooms(Room room)
+    {
+        if (CheckIfRoomIsBanned(room)) return;
+        bannedRooms.Add(room);
+    }
+
     #endregion
 
     #region Photon Callbacks
@@ -425,27 +439,16 @@ public class MainMenu : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        PhotonNetwork.AutomaticallySyncScene = true;
-
-        currentPlayerList = PhotonNetwork.PlayerList;
-
-        for (int i = currentPlayerList.Length - 1; i >= 0; i--)
-        {
-            if (!currentPlayerList[i].IsMasterClient)
-                LoadScene(currentPlayerList[i]);
-        }
-
+        PhotonNetwork.CurrentRoom.IsOpen = false;
+        PhotonNetwork.CurrentRoom.IsVisible = false;
         PhotonNetwork.LoadLevel(Level);
-    }
-
-    private void LoadScene(Player newPlayer)
-    {
-        playerView.OnLoadScene(newPlayer);
     }
 
     private void OnKickPlayer(Player newPlayer)
     {
         if (!PhotonNetwork.IsMasterClient) return;
+
+        AddToBannedRooms(PhotonNetwork.CurrentRoom);
 
         playerView.OnKickPlayer(newPlayer);
         SetStatus("Being kicked");
@@ -454,7 +457,14 @@ public class MainMenu : MonoBehaviourPunCallbacks
     public void KickedPlayer()
     {
         wasKicked = true;
+        AddBannedRoom(PhotonNetwork.CurrentRoom);
         PhotonNetwork.LeaveRoom(false);
+    }
+
+    private void AddBannedRoom(Room room)
+    {
+        if (!bannedRooms.Contains(room)) return;
+        bannedRooms.Add(room);
     }
 
     private void LeaveTheRoom()

@@ -9,13 +9,19 @@ public class CharacterController : MonoBehaviourPun
     [SerializeField] private bool _vertical;
     [SerializeField] private bool _flip;
     [SerializeField] private SpawnPoint _spawnPoint;
+    [SerializeField] private CharacterWallOfDeath _wallOfDeath; 
     
     private CharacterModel _model;
 
     private void Awake()
     {
-        if (!photonView.IsMine) Destroy(this);
+        if (!photonView.IsMine)
+        {
+            Destroy(this);
+            return;
+        }
         _model = GetComponent<CharacterModel>();
+        _wallOfDeath.OnBallEnter += Die;
     }
 
     private void Update()
@@ -44,13 +50,10 @@ public class CharacterController : MonoBehaviourPun
         _model.Init(_vertical);
     }
 
-    private void OnTriggerEnter2D(Collider2D col)
+    private void Die()
     {
-        var ball = col.gameObject.GetComponent<BallModel>();
-        if (ball != null)
-        {
-            _spawnPoint.SetOccupied(false);
-            _model.Die();
-        }
+        _spawnPoint.SetOccupied(false);
+        _model.Die();
     }
+
 }

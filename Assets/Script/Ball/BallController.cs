@@ -57,7 +57,7 @@ public class BallController : MonoBehaviourPun
 
     private void OnTriggerEnter2D(Collider2D col)
     {
-        var wallOfDeath = col.gameObject.GetComponent<CharacterModel>();
+        var wallOfDeath = col.gameObject.GetComponent<CharacterWallOfDeath>();
         if (wallOfDeath)
         {
             _ballModel.Die();

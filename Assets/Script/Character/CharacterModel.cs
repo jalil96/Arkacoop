@@ -1,5 +1,6 @@
 using System;
 using Photon.Pun;
+using Photon.Pun.UtilityScripts;
 using UnityEngine;
 
 public class CharacterModel : MonoBehaviourPun, ICollisionable
@@ -64,13 +65,13 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
     {
         _score += score;
         photonView.RPC(nameof(UpdateScore), RpcTarget.Others, _score);
+        PhotonNetwork.LocalPlayer.SetScore(_score);
     }
     
     public void Die()
     {
         _dead = true;
         photonView.RPC(nameof(UpdateDead), RpcTarget.All, _dead);
-        OnDied?.Invoke();
     }
 
     [PunRPC]
@@ -84,6 +85,7 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
     {
         _dead = dead;
         gameObject.SetActive(!_dead);
+        OnDied?.Invoke();
     }
 
     private void OnDrawGizmos()

@@ -11,6 +11,12 @@ public class PlayerData
 {
     public int score;
     public string nickname;
+
+    public PlayerData(int score, string nickname)
+    {
+        this.score = score;
+        this.nickname = nickname;
+    }
 }
 
 public class ScoreManager : MonoBehaviour
@@ -24,11 +30,14 @@ public class ScoreManager : MonoBehaviour
 
     public Text titleTxt;
 
-    private List<PlayerScore> playerScoreList;
-
+    [SerializeField] private List<PlayerScore> _playerScoreList;
     private void Awake()
     {
+        mainMenuButton.onClick.AddListener(BackToMainMenu);
         playerScorePrefab.gameObject.SetActive(false);
+        SetTitle(PersistScoreData.Instance.win);
+        // SetPlayersPrefab(PersistScoreData.Instance.playersData.Count);
+        SetScores(PersistScoreData.Instance.playersData);
     }
 
     public void SetTitle(bool win)
@@ -44,15 +53,15 @@ public class ScoreManager : MonoBehaviour
         playerScorePrefab.gameObject.SetActive(false);
         for (int i = 0; i < quantityPlayer; i++)
         {
-            PlayerScore aux = Instantiate(playerScorePrefab, playerListContainer.transform);
+            PlayerScore aux = Instantiate(playerScorePrefab, playerListContainer.transform, false);
             aux.gameObject.SetActive(false);
-            playerScoreList.Add(aux);
+            _playerScoreList.Add(aux);
         }
     }
 
     public void SetScores(List<PlayerData> playerList)
     {
-        IEnumerable orderedList =  playerList.OrderBy(o => o.score);
+        IEnumerable orderedList =  playerList.OrderBy(o => o.score).Reverse();
 
         List<PlayerData> auxList =  new List<PlayerData>();
 
@@ -66,18 +75,25 @@ public class ScoreManager : MonoBehaviour
 
     public void RefreshList(List<PlayerData> playerList)
     {
-        for (int i = 0; i < playerScoreList.Count; i++)
+        for (int i = 0; i < _playerScoreList.Count; i++)
         {
             if((playerList.Count() - 1) < i)
             {
-                playerScoreList[i].gameObject.SetActive(false);
+                _playerScoreList[i].gameObject.SetActive(false);
                 continue;
             }
 
-            playerScoreList[i].gameObject.SetActive(true);
-            playerScoreList[i].positionTxt.text = $"{i + 1} - ";
-            playerScoreList[i].nameTxt.text = playerList[i].nickname;
-            playerScoreList[i].scoreTxt.text = playerList[i].score.ToString();
+            _playerScoreList[i].gameObject.SetActive(true);
+            _playerScoreList[i].positionTxt.text = $"{i + 1} - ";
+            _playerScoreList[i].nameTxt.text = playerList[i].nickname;
+            _playerScoreList[i].scoreTxt.text = playerList[i].score.ToString();
         }
     }
+
+    public void BackToMainMenu()
+    {
+        PhotonNetwork.LeaveRoom();
+        PhotonNetwork.LoadLevel("MainMenu");
+    }
+    
 }

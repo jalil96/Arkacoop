@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Photon.Pun;
+using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 using UnityEditor.U2D.Animation;
 using UnityEngine;
@@ -17,6 +18,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     private List<BrickModel> _bricks = new List<BrickModel>();
 
     private int _activePlayers;
+    private bool _win;
     
     private void Start()
     {
@@ -95,12 +97,37 @@ public class GameManager : MonoBehaviourPunCallbacks
     private void ShowLoseScreen()
     {
         _loseScreen.SetActive(true);
+        _win = false;
+        Invoke(nameof(ChangeScene), 2f);
     }
 
     [PunRPC]
     private void ShowWinScreen()
     {
         _winScreen.SetActive(true);
+        _win = true;
+        Invoke(nameof(ChangeScene), 2f);
+    }
+
+    private void ChangeScene()
+    {
+        SaveScoreData(_win);
+        PhotonNetwork.LoadLevel("ScoreScreen");
+    }
+
+    private void SaveScoreData(bool win)
+    {
+        var playersData = new List<PlayerData>();
+        var players = PhotonNetwork.PlayerList;
+        
+        foreach (var player in players)
+        {
+            playersData.Add(new PlayerData(player.GetScore(), player.NickName));
+            Debug.Log($"Saving {player.NickName} score: {player.GetScore()}");
+        }
+
+        PersistScoreData.Instance.win = win;
+        PersistScoreData.Instance.playersData = playersData;
     }
 
     private void SetNewCharacter(CharacterModel characterModel)

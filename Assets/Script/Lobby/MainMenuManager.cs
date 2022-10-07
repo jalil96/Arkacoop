@@ -45,12 +45,12 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
     [Header("Prompts")]
     [SerializeField] private Button kickedOutConfirmButton;
 
-    public bool wasKicked;
     private List<Panel> allPanels = new List<Panel>();
     private bool skipEverything; //for cheating the login
 
     //PROPIERTIES
     public MainMenuView PlayerView { get; private set; }
+    public bool Kicked { get; set; }
     public int MaxPlayers { get; private set; }
     public int MinPlayers => MINIMUM_PLAYERS_FOR_GAME;
     public string DefaultRoom => DEFAULT_ROOM_NAME;
@@ -74,7 +74,7 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
         txtNickname.gameObject.SetActive(false);
         quitButton.onClick.AddListener(OnQuitButton);
         logInButton.onClick.AddListener(LogInUser);
-        kickedOutConfirmButton.onClick.AddListener(() => { ChangePanel(choosePanels); wasKicked = false; });
+        kickedOutConfirmButton.onClick.AddListener(() => { ChangePanel(choosePanels); Kicked = false; });
 
         //Set all panels
         allPanels.Add(loggingPanel);
@@ -198,7 +198,7 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        if (!wasKicked)
+        if (!Kicked)
             ChangePanel(choosePanels);
 
         SetStatus("Connected to Lobby");
@@ -228,7 +228,7 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
 
     public override void OnLeftRoom()
     {
-        if(wasKicked)
+        if(Kicked)
             ChangePanel(kickedPanel);
         else
             ChangePanel(choosePanels);
@@ -236,7 +236,7 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
 
     public void KickedPlayer()
     {
-        wasKicked = true;
+        Kicked = true;
         OnBannedRoom.Invoke(PhotonNetwork.CurrentRoom);
         PhotonNetwork.LeaveRoom(false);
     }
@@ -253,6 +253,6 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
     {
         OnClearData.Invoke();
         skipEverything = false;
-        wasKicked = false;
+        Kicked = false;
     }
 }

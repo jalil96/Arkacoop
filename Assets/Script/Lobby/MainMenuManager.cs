@@ -47,6 +47,7 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
 
     private List<Panel> allPanels = new List<Panel>();
     private bool skipEverything; //for cheating the login
+    private bool forceStart;
 
     //PROPIERTIES
     public MainMenuView PlayerView { get; private set; }
@@ -127,6 +128,9 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
     {
         if (Input.GetKeyDown(KeyCode.F1))
             QuickMatchCheat();
+
+        if (Input.GetKeyDown(KeyCode.F2))
+            ForceStart();
     }
 
     private IEnumerator JoinRandomRoomTimer(float timer)
@@ -145,6 +149,12 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
         PhotonNetwork.ConnectUsingSettings();
 
         skipEverything = true;
+    }
+
+    private void ForceStart()
+    {
+        forceStart = true;
+        QuickMatchCheat();
     }
 
     public void ChangePanel(Panel panelToOpen)
@@ -216,6 +226,12 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
+        if (forceStart)
+        {
+            PhotonNetwork.LoadLevel(Level);
+            return;
+        }
+
         SetStatus("Joined Room");
         ChangePanel(roomLobbyPanel);
     }

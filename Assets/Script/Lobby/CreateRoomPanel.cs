@@ -16,11 +16,16 @@ public class CreateRoomPanel : MonoBehaviourPunCallbacks
 
     private MainMenuManager mainMenu;
 
-    void Awake()
+    void Start()
     {
         mainMenu = GetComponent<MainMenuManager>();
         mainMenu.OnBaseCreateRoom += BaseCreateRoom;
         GenerateCreateRoomPanel();
+    }
+
+    private void OnDestroy()
+    {
+        mainMenu.OnBaseCreateRoom -= BaseCreateRoom;
     }
 
     private void GenerateCreateRoomPanel()

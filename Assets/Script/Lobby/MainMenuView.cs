@@ -5,15 +5,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class MenuPlayerView : MonoBehaviourPun
+public class MainMenuView : MonoBehaviourPun
 {
-    [SerializeField] private MainMenu mainMenu;
+    [SerializeField] private MainMenuManager mainMenu;
 
     void Awake()
     {
         if (!this.photonView.IsMine) Destroy(this);
 
-        mainMenu = GetComponent<MainMenu>();
+        mainMenu = GetComponent<MainMenuManager>();
     }
 
     public void OnKickPlayer(Player newPlayer)

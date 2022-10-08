@@ -58,7 +58,6 @@ public class InRoomPanel : MonoBehaviourPunCallbacks
             playerButtons.Add(aux);
         }
 
-
         void OnOpen()
         {
             if (PhotonNetwork.IsMasterClient)
@@ -144,6 +143,7 @@ public class InRoomPanel : MonoBehaviourPunCallbacks
             mainMenu.SetStatus("Ready to start");
         else
             mainMenu.SetStatus("Waiting for more players");
+
         return hasEnough;
     }
 

@@ -93,9 +93,15 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
     public void RestartMenu()
     {
         if (PhotonNetwork.IsConnectedAndReady)
+        {
             ChangePanel(choosePanels);
+            SetStatus("Connected to Lobby");
+        }
         else
+        {
             ChangePanel(loggingPanel);
+            SetStatus("Please Log In");
+        }
     }
 
     #region GeneratingPanels
@@ -112,14 +118,11 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
 
         void OnOpen()
         {
-            SetStatus("Searching for rooms");
             StartCoroutine(JoinRandomRoomTimer(timeOutSearch));
         }
 
         void OnClose()
         {
-            if(!PhotonNetwork.InRoom)
-                SetStatus("No rooms found");
         }
     }
     #endregion
@@ -135,10 +138,15 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
 
     private IEnumerator JoinRandomRoomTimer(float timer)
     {
+        SetStatus("Searching for rooms");
+
         yield return new WaitForSeconds(timer);
 
         if (!PhotonNetwork.InRoom)
+        {
             ChangePanel(choosePanels);
+            SetStatus("No rooms found");
+        }
     }
 
     private void QuickMatchCheat()
@@ -190,6 +198,7 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
     {
         PhotonNetwork.JoinRandomRoom();
         ChangePanel(joiningRoomsWaitPanel);
+        SetStatus("Joining random Room");
     }
 
     #region Photon Callbacks
@@ -244,10 +253,17 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
 
     public override void OnLeftRoom()
     {
-        if(Kicked)
+        if (Kicked)
+        {
             ChangePanel(kickedPanel);
+            SetStatus("Kicked from room");
+
+        }
         else
+        {
             ChangePanel(choosePanels);
+            SetStatus("Left Room");
+        }
     }
 
     public void KickedPlayer()

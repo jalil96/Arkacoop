@@ -50,6 +50,11 @@ public class CharacterController : MonoBehaviourPun
         _model.Init(_vertical);
     }
 
+    public void SetCharaterInformation(CharacterUI characterInfo)
+    {
+        _model.SetCharacterInformation(characterInfo);
+    }
+
     private void Die()
     {
         _spawnPoint.SetOccupied(false);

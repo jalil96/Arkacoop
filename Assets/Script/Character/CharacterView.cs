@@ -11,6 +11,7 @@ public class CharacterView : MonoBehaviour
 
     private void Update()
     {
-        _scoreText.text = _characterModel.Score.ToString();
+        //_scoreText.text = _characterModel.Score.ToString();
+        
     }
 }

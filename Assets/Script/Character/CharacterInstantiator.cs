@@ -51,8 +51,12 @@ public class CharacterInstantiator : MonoBehaviourPunCallbacks
 
     private void InstantiateCharacter(SpawnPoint spawn)
     {
-        var character = PhotonNetwork.Instantiate("Character", spawn.transform.position, spawn.transform.rotation).GetComponentInChildren<CharacterController>();
-    
+        CharacterController character = PhotonNetwork.Instantiate("Character", spawn.transform.position, spawn.transform.rotation).GetComponentInChildren<CharacterController>();
+
+        CharacterUI canvasInfo = PhotonNetwork.Instantiate(spawn.CanvasInfoPrefab.gameObject.name.ToString(), spawn.CanvasSpawnPoint.position, spawn.CanvasSpawnPoint.rotation).GetComponentInChildren<CharacterUI>();
+        canvasInfo.transform.SetParent(spawn.CanvasSpawnPoint);
+        //TODO set character info reference in character model to update score and set name;
+
         character.SetFlip(spawn.Flip);
         character.SetVertical(spawn.Vertical);
 

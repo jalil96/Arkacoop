@@ -71,6 +71,8 @@ public class RoomSelectionPanel : MonoBehaviourPunCallbacks
             RoomReceived(room);
         }
 
+        //TODO: check whats happens with close  or no more visible rooms. 
+
         if (mainMenu.chooseRoomPanel.IsOpen)
         {
             ShowRoomList(currentRoomList.Count > 0);
@@ -96,18 +98,22 @@ public class RoomSelectionPanel : MonoBehaviourPunCallbacks
     private void AddToBannedRooms(RoomInfo room)
     {
         if (CheckIfRoomIsBanned(room)) return;
+
         bannedRooms.Add(room);
+
+        if (CheckRoomIsInCurrentList(room))
+            currentRoomList.Remove(room);
     }
 
     private void AddRoomToList(RoomInfo room)
     {
         if (CheckIfRoomIsBanned(room)) return;
-        if (CheckRoomIsNotInCurrentList(room)) return;
+        if (CheckRoomIsInCurrentList(room)) return;
 
         currentRoomList.Add(room);
     }
 
-    private bool CheckRoomIsNotInCurrentList(RoomInfo room)
+    private bool CheckRoomIsInCurrentList(RoomInfo room)
     {
         return currentRoomList.Contains(room);
     }

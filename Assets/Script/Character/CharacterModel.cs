@@ -15,6 +15,8 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
     
     [SerializeField] private SpriteRenderer _sprite;
 
+    private CharacterUI _characterUI;
+
     private float _spriteOffset;
 
     private bool _vertical;
@@ -25,6 +27,8 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
     public bool Vertical => _vertical;
     public bool Dead => _dead;
     public int Score => _score;
+
+    public CharacterUI CharacterUI => _characterUI;
     
     public void Init(bool vertical)
     {
@@ -78,6 +82,7 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
     public void UpdateScore(int score)
     {
         _score = score;
+        CharacterUI.score.text = score.ToString();
     }
     
     [PunRPC]
@@ -86,6 +91,11 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
         _dead = dead;
         gameObject.SetActive(!_dead);
         OnDied?.Invoke();
+    }
+
+    public void SetCharacterInformation(CharacterUI characterInfo)
+    {
+        _characterUI = characterInfo;
     }
 
     private void OnDrawGizmos()

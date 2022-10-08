@@ -1300,7 +1300,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   roomNameInput: {fileID: 36095497}
   maxPlayersSlider: {fileID: 1387521198}
-  txtMaxPlayersValue: {fileID: 509780288}
+  txtMaxPlayersValue: {fileID: 56736642}
   createRoomButton: {fileID: 728711783}
   goBackToChooseButton: {fileID: 2012077212}
 --- !u!114 &395023551
@@ -1319,7 +1319,7 @@ MonoBehaviour:
   statusText: {fileID: 709704154}
   quitButton: {fileID: 729633418}
   statusPrefix: 'Status: '
-  Level: Level
+  Level: Level_v2
   loggingPanel: {fileID: 1769930648}
   choosePanels: {fileID: 1892763981}
   roomSettingPanel: {fileID: 1320983503}

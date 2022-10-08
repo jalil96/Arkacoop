@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CharacterInformation : MonoBehaviour
+public class CharacterUI : MonoBehaviour
 {
     public Text playerNickName;
     public Text score;

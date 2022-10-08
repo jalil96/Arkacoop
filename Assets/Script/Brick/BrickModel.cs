@@ -25,11 +25,13 @@ public class BrickModel : MonoBehaviourPun, ICollisionable
     
     public void Damage(int amount)
     {
+        if (_destroyed) return;
         _hits -= amount;
         OnBrickHited?.Invoke();
         if (_hits <= 0)
         {
             // PhotonNetwork.Destroy(gameObject);
+            Debug.Log($"Brick destroyed: {photonView.ViewID}");
             _destroyed = true;
             photonView.RPC(nameof(UpdateDestroyed), RpcTarget.All, _destroyed);
             OnBrickDestroyed.Invoke();

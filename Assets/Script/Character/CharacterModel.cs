@@ -6,16 +6,15 @@ using UnityEngine;
 public class CharacterModel : MonoBehaviourPun, ICollisionable
 {
     public Action OnDied = delegate { };
-    
-    [SerializeField] private float _speed;
+    public Action OnUpdateScore = delegate { };
+
+        [SerializeField] private float _speed;
     
     [SerializeField] private Transform _boundaryLeft;
     [SerializeField] private Transform _boundaryRight;
     [Range(0,1)][SerializeField] private float _boundaryOffset;
     
     [SerializeField] private SpriteRenderer _sprite;
-
-    private CharacterUI _characterUI;
 
     private float _spriteOffset;
 
@@ -28,8 +27,6 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
     public bool Dead => _dead;
     public int Score => _score;
 
-    public CharacterUI CharacterUI => _characterUI;
-    
     public void Init(bool vertical)
     {
         _vertical = vertical;
@@ -68,8 +65,9 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
     public void AddScore(int score)
     {
         _score += score;
+        OnUpdateScore.Invoke();
         photonView.RPC(nameof(UpdateScore), RpcTarget.Others, _score);
-        PhotonNetwork.LocalPlayer.SetScore(_score);
+        photonView.Owner.SetScore(_score);
     }
     
     public void Die()
@@ -82,7 +80,7 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
     public void UpdateScore(int score)
     {
         _score = score;
-        CharacterUI.score.text = score.ToString();
+        OnUpdateScore.Invoke();
     }
     
     [PunRPC]
@@ -91,11 +89,6 @@ public class CharacterModel : MonoBehaviourPun, ICollisionable
         _dead = dead;
         gameObject.SetActive(!_dead);
         OnDied?.Invoke();
-    }
-
-    public void SetCharacterInformation(CharacterUI characterInfo)
-    {
-        _characterUI = characterInfo;
     }
 
     private void OnDrawGizmos()

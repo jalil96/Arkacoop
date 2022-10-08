@@ -12,7 +12,12 @@ public class SpawnPoint : MonoBehaviourPun
     [SerializeField] private WallController _wallController;
     [SerializeField] private Player _playerReference;
     [SerializeField] private CharacterUI _characterInformation;
-    [SerializeField] private Transform _characterInfoSpawnPoint;
+
+
+    private void Awake()
+    {
+        _characterInformation.gameObject.SetActive(false);
+    }
 
     private void Start()
     {
@@ -25,9 +30,7 @@ public class SpawnPoint : MonoBehaviourPun
     public bool Vertical => _vertical;
     public bool Occupied => _occupied;
     public Player PlayerReference => _playerReference;
-
-    public CharacterUI CanvasInfoPrefab => _characterInformation;
-    public Transform CanvasSpawnPoint => _characterInfoSpawnPoint;
+    public CharacterUI CanvasInfo => _characterInformation;
 
     public void SetOccupied(bool occupied)
     {
@@ -40,6 +43,7 @@ public class SpawnPoint : MonoBehaviourPun
     {
         _playerReference = player;
         _characterInformation.playerNickName.text = player.NickName;
+        CanvasInfo.Setup(true, player);
         photonView.RPC(nameof(UpdatePlayerReference), RpcTarget.OthersBuffered, _playerReference);
     }
 

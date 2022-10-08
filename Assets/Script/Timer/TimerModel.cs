@@ -33,6 +33,7 @@ public class TimerModel : MonoBehaviourPun
     {
         _started = false;
         CancelInvoke(nameof(BroadcastTime));
+        photonView.RPC(nameof(UpdateStarted), RpcTarget.Others, _started);
     }
 
     private void BroadcastTime()

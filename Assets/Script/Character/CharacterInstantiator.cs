@@ -53,14 +53,16 @@ public class CharacterInstantiator : MonoBehaviourPunCallbacks
     {
         CharacterController character = PhotonNetwork.Instantiate("Character", spawn.transform.position, spawn.transform.rotation).GetComponentInChildren<CharacterController>();
 
-        CharacterUI canvasInfo = PhotonNetwork.Instantiate(spawn.CanvasInfoPrefab.gameObject.name.ToString(), spawn.CanvasSpawnPoint.position, spawn.CanvasSpawnPoint.rotation).GetComponentInChildren<CharacterUI>();
-        canvasInfo.transform.SetParent(spawn.CanvasSpawnPoint);
+        // CharacterUI canvasInfo = PhotonNetwork.Instantiate(spawn.CanvasInfoPrefab.gameObject.name, spawn.CanvasSpawnPoint.position, spawn.CanvasSpawnPoint.rotation).GetComponentInChildren<CharacterUI>();
+        // canvasInfo.gameObject.transform.Rotate(0,0,0, Space.World);
+        // canvasInfo.transform.SetParent(spawn.CanvasSpawnPoint);
         //TODO set character info reference in character model to update score and set name;
 
         character.SetFlip(spawn.Flip);
         character.SetVertical(spawn.Vertical);
 
         character.SetSpawnPoint(spawn);
+        character.gameObject.GetComponent<CharacterView>().SetCharacterUI(spawn.CanvasInfo); // Esto se hace porque necesita de la variable Vertical del character y en el start del view esto no seria posible
         spawn.SetOccupied(true);
         spawn.SetPlayerReference(PhotonNetwork.LocalPlayer);
     }

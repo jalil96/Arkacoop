@@ -19,6 +19,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private int _activePlayers;
     private bool _win;
+    private bool _gameStarted;
+    private bool _changeScene;
     
     private void Start()
     {
@@ -49,7 +51,9 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.IsMasterClient) return;
         if (Input.GetButtonDown("Submit"))
         {
+            Debug.Log("Starting game!");
             StartGame();
+            Debug.Log("Game started!");
         }
     }
 
@@ -63,12 +67,17 @@ public class GameManager : MonoBehaviourPunCallbacks
             // Hacer algo?
         }
 
+        if (_gameStarted) return;
+        
+        _gameStarted = true;
+        
         _characters = FindObjectsOfType<CharacterModel>().ToList();
         foreach (var character in _characters)
         {
             SetNewCharacter(character);
         }
         _activePlayers = _characters.Count();
+    
         
         _timerController.StartTimer();
     }
@@ -78,8 +87,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.IsMasterClient) return;
         if (_characters.All(character => character.Dead))
         {
-            photonView.RPC(nameof(ShowLoseScreen), RpcTarget.All); // ShowLoseScreen();
-            _timerController.StopTimer();
+            EndGame(false);
         }
     }
 
@@ -88,8 +96,31 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.IsMasterClient) return;
         if (_bricks.All(brick => brick.Destroyed))
         {
-            photonView.RPC(nameof(ShowWinScreen), RpcTarget.All);
-            _timerController.StopTimer();
+            EndGame(true);
+        }
+    }
+
+    private void EndGame(bool win)
+    {
+        Debug.Log($"We win? {win}");
+        photonView.RPC(win ? nameof(ShowWinScreen) : nameof(ShowLoseScreen), RpcTarget.All);
+        _timerController.StopTimer();
+        var balls = FindObjectsOfType<BallModel>();
+        var bricks = FindObjectsOfType<BrickModel>();
+        foreach (var ball in balls)
+        {
+            ball.gameObject.SetActive(false);
+        }
+        foreach (var brick in bricks)
+        {
+            brick.gameObject.SetActive(false);
+        }
+
+        if (PhotonNetwork.IsMasterClient && !_changeScene)
+        {
+            Debug.Log("Calling ChangeScene");
+            _changeScene = true;
+            Invoke(nameof(ChangeScene), 2f);
         }
     }
     
@@ -98,7 +129,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         _loseScreen.SetActive(true);
         _win = false;
-        Invoke(nameof(ChangeScene), 2f);
+        SaveScoreData(_win);
     }
 
     [PunRPC]
@@ -106,12 +137,11 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         _winScreen.SetActive(true);
         _win = true;
-        Invoke(nameof(ChangeScene), 2f);
+        SaveScoreData(_win);
     }
 
     private void ChangeScene()
     {
-        SaveScoreData(_win);
         PhotonNetwork.LoadLevel("ScoreScreen");
     }
 

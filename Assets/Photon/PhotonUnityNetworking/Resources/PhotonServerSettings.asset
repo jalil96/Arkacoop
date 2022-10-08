@@ -58,6 +58,7 @@ MonoBehaviour:
   - UpdateStarted
   - UpdateTimeElapsed
   - UpdateDie
+  - UpdateSetup
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

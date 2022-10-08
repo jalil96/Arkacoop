@@ -291,7 +291,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterModel: {fileID: 6050054729256463236}
-  _scoreText: {fileID: 0}
+  _characterUI: {fileID: 0}
 --- !u!61 &1434203160462843024
 BoxCollider2D:
   m_ObjectHideFlags: 0

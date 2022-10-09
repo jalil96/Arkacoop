@@ -12,8 +12,9 @@ public class GameManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] private GameObject _loseScreen;
     [SerializeField] private GameObject _winScreen;
-    [SerializeField] private TimerController _timerController; 
-    
+    [SerializeField] private GameObject _startScreen;
+    [SerializeField] private TimerController _timerController;
+
     private List<CharacterModel> _characters = new List<CharacterModel>();
     private List<BrickModel> _bricks = new List<BrickModel>();
 
@@ -21,10 +22,13 @@ public class GameManager : MonoBehaviourPunCallbacks
     private bool _win;
     private bool _gameStarted;
     private bool _changeScene;
-    
+    private bool _readyToPlay;
+
     private void Start()
     {
+        // _startScreen.SetActive(false);
         if (!PhotonNetwork.IsMasterClient) return;
+        OnPlayerEnteredRoom(PhotonNetwork.LocalPlayer);
         _bricks = FindObjectsOfType<BrickModel>().ToList();
 
         foreach (var brick in _bricks)
@@ -36,6 +40,12 @@ public class GameManager : MonoBehaviourPunCallbacks
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         if (!PhotonNetwork.IsMasterClient) return;
+        _activePlayers++;
+        _readyToPlay = _activePlayers >= PhotonNetwork.CurrentRoom.PlayerCount;
+        if (_readyToPlay)
+        {
+            photonView.RPC(nameof(ShowStartScreen), RpcTarget.All, true);
+        }
         Debug.Log("Player entered!!");
     }
 
@@ -59,6 +69,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private void StartGame()
     {
+        Debug.Log($"Ready to player: {_readyToPlay}");
+        if (!_readyToPlay) return;
         var obj = PhotonNetwork.Instantiate("Ball", Vector3.zero, Quaternion.identity);
         var ball = obj.GetComponent<BallModel>();
 
@@ -76,10 +88,9 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             SetNewCharacter(character);
         }
-        _activePlayers = _characters.Count();
-    
-        
         _timerController.StartTimer();
+        
+        photonView.RPC(nameof(ShowStartScreen), RpcTarget.All, false);
     }
 
     private void CharacterDied()
@@ -138,6 +149,12 @@ public class GameManager : MonoBehaviourPunCallbacks
         _winScreen.SetActive(true);
         _win = true;
         SaveScoreData(_win);
+    }
+
+    [PunRPC]
+    private void ShowStartScreen(bool show)
+    {
+        _startScreen.SetActive(show);
     }
 
     private void ChangeScene()

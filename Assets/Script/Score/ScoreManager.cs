@@ -92,8 +92,8 @@ public class ScoreManager : MonoBehaviour
 
     public void BackToMainMenu()
     {
-        PhotonNetwork.LeaveRoom();
-        PhotonNetwork.LoadLevel("MainMenu");
+        // PhotonNetwork.LeaveRoom();
+        PhotonNetwork.LoadLevel("MainMenu_v2");
     }
     
 }

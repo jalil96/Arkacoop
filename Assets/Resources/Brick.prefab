@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: 1480839736688598808}
   - component: {fileID: 5965213238149477301}
   - component: {fileID: 6521986420687397684}
+  - component: {fileID: 1139543410473179158}
+  - component: {fileID: 376612389469591072}
   m_Layer: 0
   m_Name: Brick
   m_TagString: Untagged
@@ -109,6 +111,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 2846292883079387438}
+  - {fileID: 376612389469591072}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -142,6 +145,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHits: 2
   _hits: 0
+  _collider: {fileID: 6521986420687397684}
 --- !u!114 &1480839736688598808
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -169,6 +173,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _model: {fileID: -3196465986145773465}
   _text: {fileID: 898653432663391923}
+  _animator: {fileID: 1139543410473179158}
 --- !u!61 &6521986420687397684
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -195,6 +200,49 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!95 &1139543410473179158
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2846292883079387432}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 7f947591d1a12174baa3122404d63799, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &376612389469591072
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2846292883079387432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowLayerWeightsInspector: 1
+  ShowParameterInspector: 1
+  m_SynchronizeParameters:
+  - Type: 4
+    SynchronizeType: 1
+    Name: Dying
+  - Type: 4
+    SynchronizeType: 1
+    Name: Death
+  m_SynchronizeLayers:
+  - SynchronizeType: 0
+    LayerIndex: 0
 --- !u!1 &7272586515055023699
 GameObject:
   m_ObjectHideFlags: 0

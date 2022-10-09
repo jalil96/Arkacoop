@@ -12,11 +12,14 @@ GameObject:
   - component: {fileID: 5675680721881336964}
   - component: {fileID: 7746572708331950507}
   - component: {fileID: 2664592978094690309}
+  - component: {fileID: 2684364366608768228}
   - component: {fileID: 5432238800470057318}
   - component: {fileID: 1575987115862026472}
   - component: {fileID: 8997311117473061157}
   - component: {fileID: 1817284136585058258}
   - component: {fileID: 7310016303631132935}
+  - component: {fileID: 2019621324602115454}
+  - component: {fileID: 2430897068033796114}
   m_Layer: 3
   m_Name: Ball
   m_TagString: Untagged
@@ -105,6 +108,7 @@ MonoBehaviour:
   _maxBounceAngle: 45
   _pointsOnCollision: 50
   _pointsOnBreak: 100
+  _spawningDuration: 2
 --- !u!114 &2664592978094690309
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -119,6 +123,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _rigidbody: {fileID: 5432238800470057318}
   _speed: 5
+--- !u!114 &2684364366608768228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7795142590780943786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75957c352ecef7a49826c28912e9ca1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _animator: {fileID: 2019621324602115454}
+  _model: {fileID: 2664592978094690309}
 --- !u!50 &5432238800470057318
 Rigidbody2D:
   serializedVersion: 4
@@ -192,6 +210,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 7310016303631132935}
+  - {fileID: 2430897068033796114}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -211,3 +230,43 @@ MonoBehaviour:
   m_SynchronizeAngularVelocity: 0
   m_TeleportEnabled: 1
   m_TeleportIfDistanceGreaterThan: 3
+--- !u!95 &2019621324602115454
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7795142590780943786}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 2812a289b87b3784493aa5e8fd166d86, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &2430897068033796114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7795142590780943786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowLayerWeightsInspector: 1
+  ShowParameterInspector: 1
+  m_SynchronizeParameters:
+  - Type: 4
+    SynchronizeType: 1
+    Name: Spawning
+  m_SynchronizeLayers:
+  - SynchronizeType: 0
+    LayerIndex: 0

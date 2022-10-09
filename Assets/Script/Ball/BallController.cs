@@ -8,8 +8,10 @@ public class BallController : MonoBehaviourPun
     [SerializeField] private float _maxBounceAngle;
     [SerializeField] private int _pointsOnCollision = 50;
     [SerializeField] private int _pointsOnBreak = 100;
+    [SerializeField] private float _spawningDuration = 2f;
     
     private BallModel _ballModel;
+    
     
     private void Awake()
     {
@@ -20,13 +22,20 @@ public class BallController : MonoBehaviourPun
     {
         _ballModel = GetComponent<BallModel>();
         _ballModel.InitDirection();
+        Invoke(nameof(StopSpawning), _spawningDuration);
     }
 
     private void Update()
     {
+        if (_ballModel.Spawning) return; 
         _ballModel.Move();
     }
 
+    private void StopSpawning()
+    {
+        _ballModel.StopSpawning();
+    }
+    
     private void OnCollisionEnter2D(Collision2D col)
     {
         if (!photonView.IsMine) return;

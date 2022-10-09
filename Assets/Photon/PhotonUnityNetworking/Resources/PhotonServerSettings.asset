@@ -59,6 +59,11 @@ MonoBehaviour:
   - UpdateTimeElapsed
   - UpdateDie
   - UpdateSetup
+  - RequestScore
+  - RequestSetup
+  - ShowStartScreen
+  - RequestSpawning
+  - UpdateSpawning
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -12,6 +12,7 @@ public class BrickModel : MonoBehaviourPun, ICollisionable
     
     [SerializeField] private int maxHits;
     [SerializeField] private int _hits;
+    [SerializeField] private BoxCollider2D _collider;
 
     private bool _destroyed;
     
@@ -35,6 +36,7 @@ public class BrickModel : MonoBehaviourPun, ICollisionable
             _destroyed = true;
             photonView.RPC(nameof(UpdateDestroyed), RpcTarget.All, _destroyed);
             OnBrickDestroyed.Invoke();
+            _collider.enabled = false;
             return;
         }
         photonView.RPC(nameof(UpdateHits), RpcTarget.Others, _hits);
@@ -51,6 +53,11 @@ public class BrickModel : MonoBehaviourPun, ICollisionable
     private void UpdateDestroyed(bool destroyed)
     {
         _destroyed = destroyed;
+        Invoke(nameof(DeactivateObject), 1f);
+    }
+
+    private void DeactivateObject()
+    {
         gameObject.SetActive(!_destroyed);
     }
     

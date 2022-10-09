@@ -7,13 +7,23 @@ using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 using UnityEditor.U2D.Animation;
 using UnityEngine;
+using TMPro;
+using UnityEditor.VersionControl;
+using System.Collections;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] private GameObject _loseScreen;
     [SerializeField] private GameObject _winScreen;
     [SerializeField] private GameObject _startScreen;
+    [SerializeField] private TextMeshProUGUI _startMessage;
     [SerializeField] private TimerController _timerController;
+    [SerializeField] private int _countDownTime = 3;
+
+    //Start screen messages
+    private string _hostReadyMessage = "Press Spacebar to Start";
+    private string _playersReadyMessage = "Ready to Start";
+    private string _waitingMessage = "Waiting for all players";
 
     private List<CharacterModel> _characters = new List<CharacterModel>();
     private List<BrickModel> _bricks = new List<BrickModel>();
@@ -23,10 +33,13 @@ public class GameManager : MonoBehaviourPunCallbacks
     private bool _gameStarted;
     private bool _changeScene;
     private bool _readyToPlay;
+    private bool _countingDown;
 
     private void Start()
     {
-        // _startScreen.SetActive(false);
+         _startScreen.SetActive(true);
+        _startMessage.text = _waitingMessage;
+
         if (!PhotonNetwork.IsMasterClient) return;
         OnPlayerEnteredRoom(PhotonNetwork.LocalPlayer);
         _bricks = FindObjectsOfType<BrickModel>().ToList();
@@ -39,13 +52,17 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        if (!PhotonNetwork.IsMasterClient) return;
         _activePlayers++;
-        _readyToPlay = _activePlayers >= PhotonNetwork.CurrentRoom.PlayerCount;
+        _readyToPlay = (_activePlayers + 1) >= PhotonNetwork.CurrentRoom.PlayerCount; //we add one because the host doesn't add itself
+
+        if (!PhotonNetwork.IsMasterClient) return;
+
         if (_readyToPlay)
         {
-            photonView.RPC(nameof(ShowStartScreen), RpcTarget.All, true);
+            _startMessage.text = _hostReadyMessage;
+            photonView.RPC(nameof(UpdateStartScreenMessage), RpcTarget.Others, _playersReadyMessage);
         }
+
         Debug.Log("Player entered!!");
     }
 
@@ -60,16 +77,12 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsMasterClient) return;
         if (Input.GetButtonDown("Submit"))
-        {
-            Debug.Log("Starting game!");
-            StartGame();
-            Debug.Log("Game started!");
-        }
+            StartCountDown();
     }
 
     private void StartGame()
     {
-        Debug.Log($"Ready to player: {_readyToPlay}");
+        Debug.Log($"Ready to play: {_readyToPlay}");
         if (!_readyToPlay) return;
         var obj = PhotonNetwork.Instantiate("Ball", Vector3.zero, Quaternion.identity);
         var ball = obj.GetComponent<BallModel>();
@@ -91,6 +104,31 @@ public class GameManager : MonoBehaviourPunCallbacks
         _timerController.StartTimer();
         
         photonView.RPC(nameof(ShowStartScreen), RpcTarget.All, false);
+    }
+
+    private void StartCountDown()
+    {
+        if (_countingDown) return;
+        _countingDown = true;
+        StartCoroutine(TimerCountDown());
+    }
+
+    private IEnumerator TimerCountDown()
+    {
+        for (int i = _countDownTime - 1; i >= 0; i--)
+        {
+            SendStartTimeMessage((i + 1).ToString());
+            yield return new WaitForSeconds(1f);
+        }
+
+        StartGame();
+    }
+
+    private void SendStartTimeMessage(string message)
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+        _startMessage.text = message;
+        photonView.RPC(nameof(UpdateStartScreenMessage), RpcTarget.All, message);
     }
 
     private void CharacterDied()
@@ -155,6 +193,12 @@ public class GameManager : MonoBehaviourPunCallbacks
     private void ShowStartScreen(bool show)
     {
         _startScreen.SetActive(show);
+    }
+
+    [PunRPC]
+    private void UpdateStartScreenMessage(string message)
+    {
+        _startMessage.text = message;
     }
 
     private void ChangeScene()

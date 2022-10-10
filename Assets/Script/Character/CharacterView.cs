@@ -10,10 +10,17 @@ public class CharacterView : MonoBehaviourPun
 {
     [SerializeField] private CharacterModel _characterModel;
     [SerializeField] private CharacterUI _characterUI;
+    [SerializeField] private Color _color = Color.cyan;
+
+    private SpriteRenderer _spriteRenderer;
 
     private void Start()
     {
         if (!photonView.IsMine) return;
+
+        _spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+        _spriteRenderer.color = _color;
+
         _characterModel.OnUpdateScore += UpdateScore;
     }
 

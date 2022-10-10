@@ -292,6 +292,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _characterModel: {fileID: 6050054729256463236}
   _characterUI: {fileID: 0}
+  _color: {r: 0.42779157, g: 0.9716981, b: 0.84128296, a: 1}
 --- !u!61 &1434203160462843024
 BoxCollider2D:
   m_ObjectHideFlags: 0

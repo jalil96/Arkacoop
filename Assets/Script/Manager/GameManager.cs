@@ -79,7 +79,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         // Leave because the master leaved
         PhotonNetwork.LeaveRoom(false);
-        PhotonNetwork.LoadLevel("MainMenu");
+        PhotonNetwork.LoadLevel("MainMenu_v2");
     }
 
     private void Update()
@@ -87,6 +87,10 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.IsMasterClient) return;
         if (Input.GetButtonDown("Submit"))
             StartCountDown();
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            var obj = PhotonNetwork.Instantiate("Ball", Vector3.zero, Quaternion.identity);
+        }
     }
 
     private void StartGame()

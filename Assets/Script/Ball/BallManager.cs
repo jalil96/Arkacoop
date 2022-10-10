@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Photon.Pun;
 using UnityEditor.Timeline.Actions;
 using UnityEngine;
@@ -14,12 +15,13 @@ public class BallManager : MonoBehaviourPun
     
     [SerializeField] private List<BallModel> _activeBalls;
     [SerializeField] private GameManager _gameManager;
-    
+
+    private List<CharacterModel> _characters;
+
     private void Start()
     {
         if(!PhotonNetwork.IsMasterClient) Destroy(this);
-        InvokeRepeating(nameof(SpawnBall), 0, _timeBetweenSpawning);
-        _gameManager.OnGameStarted += SpawnBall;
+        _gameManager.OnGameStarted += Init;
     }
 
     private void Update()
@@ -34,10 +36,17 @@ public class BallManager : MonoBehaviourPun
         }
     }
 
+    private void Init()
+    {
+        _characters = FindObjectsOfType<CharacterModel>().ToList();
+        InvokeRepeating(nameof(SpawnBall), 0, _timeBetweenSpawning);
+    }
+
     public void SpawnBall()
     {
         _activeBalls = _activeBalls.FindAll(ball => ball != null);
-        _maxBallsInScreen = PhotonNetwork.CountOfPlayers;
+        _characters = _characters.FindAll(character => !character.Dead);
+        _maxBallsInScreen = _characters.Count;
         if (_activeBalls.Count >= _maxBallsInScreen) return;
         
         var spawn = _ballSpawnPoints[Random.Range(0, _ballSpawnPoints.Count)];

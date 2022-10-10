@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 using Photon.Pun;
 using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
-using UnityEditor.U2D.Animation;
 using UnityEngine;
 using TMPro;
-using UnityEditor.VersionControl;
 using System.Collections;
 
 public class GameManager : MonoBehaviourPunCallbacks

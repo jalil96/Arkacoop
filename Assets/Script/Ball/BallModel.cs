@@ -20,7 +20,9 @@ public class BallModel : MonoBehaviourPun
     private Vector2 _direction;
     private bool _active = true;
     private bool _spawning;
-    
+
+    public Action<BallModel> OnDie = delegate { };
+
     private void Start()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
@@ -56,6 +58,7 @@ public class BallModel : MonoBehaviourPun
 
     public void Die()
     {
+        OnDie.Invoke(this);
         photonView.RPC(nameof(UpdateDie), RpcTarget.Others);
         Destroy(gameObject);
     }

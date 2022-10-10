@@ -11,9 +11,8 @@ using System.Collections;
 public class GameManager : MonoBehaviourPunCallbacks
 {
     public Action OnGameStarted = delegate {  };
+    public Action OnGameFinished = delegate { };
     
-    [SerializeField] private GameObject _loseScreen;
-    [SerializeField] private GameObject _winScreen;
     [SerializeField] private GameObject _startScreen;
     [SerializeField] private TextMeshProUGUI _startMessage;
     [SerializeField] private TimerController _timerController;
@@ -33,6 +32,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     private bool _changeScene;
     private bool _readyToPlay;
     private bool _countingDown;
+
+    public bool Finished { get; private set; }
 
     private void Start()
     {
@@ -154,6 +155,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private void EndGame(bool win)
     {
+        OnGameFinished.Invoke();
+        Finished = true;
         Debug.Log($"We win? {win}");
         photonView.RPC(win ? nameof(ShowWinScreen) : nameof(ShowLoseScreen), RpcTarget.All);
         _timerController.StopTimer();
@@ -179,7 +182,6 @@ public class GameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     private void ShowLoseScreen()
     {
-        _loseScreen.SetActive(true);
         _win = false;
         SaveScoreData(_win);
     }
@@ -187,7 +189,6 @@ public class GameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     private void ShowWinScreen()
     {
-        _winScreen.SetActive(true);
         _win = true;
         SaveScoreData(_win);
     }

@@ -14,23 +14,20 @@ public class BallManager : MonoBehaviourPun
     [SerializeField] private GameManager _gameManager;
 
     private List<CharacterModel> _characters;
+    private bool stopSpawning =  false;
 
     private void Start()
     {
         if(!PhotonNetwork.IsMasterClient) Destroy(this);
+
         _gameManager.OnGameStarted += Init;
+        _gameManager.OnGameFinished += OnGameEnded;
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.F3))
-        {
-            var spawn = _ballSpawnPoints[Random.Range(0, _ballSpawnPoints.Count)];
-            var position = spawn.position;
-            var rotation = spawn.rotation;
-            var ball = PhotonNetwork.Instantiate("Ball", position, rotation);
-            _activeBalls.Add(ball.GetComponent<BallModel>());
-        }
+            InstantiateBall();
     }
 
     private void Init()
@@ -45,12 +42,38 @@ public class BallManager : MonoBehaviourPun
         _characters = _characters.FindAll(character => !character.Dead);
         _maxBallsInScreen = _characters.Count;
         if (_activeBalls.Count >= _maxBallsInScreen) return;
-        
+
+        InstantiateBall();
+    }
+
+    public void InstantiateBall()
+    {
+        if (stopSpawning) return;
         var spawn = _ballSpawnPoints[Random.Range(0, _ballSpawnPoints.Count)];
         var position = spawn.position;
         var rotation = spawn.rotation;
-        var ball = PhotonNetwork.Instantiate("Ball", position, rotation);
-        _activeBalls.Add(ball.GetComponent<BallModel>());
+        var ball = PhotonNetwork.Instantiate("Ball", position, rotation).GetComponent<BallModel>();
+        ball.OnDie += CheckCurrentSituation;
+        _activeBalls.Add(ball);
+    }
+
+    public void CheckCurrentSituation(BallModel ball)
+    {
+        ball.OnDie -= CheckCurrentSituation;
+        _activeBalls.Remove(ball);
+
+        if (_activeBalls.Count <= 0 && !_gameManager.Finished)
+            InstantiateBall();
+    }
+
+    public void OnGameEnded()
+    {
+        stopSpawning = true;
+
+        for (int i = _activeBalls.Count - 1; i >= 0; i--)
+        {
+            Destroy(_activeBalls[i]);
+        }
     }
     
 }

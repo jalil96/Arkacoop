@@ -86,9 +86,6 @@ public class RoomSelectionPanel : MonoBehaviourPunCallbacks
         availableRoomsNumber.text = currentRoomList.Count.ToString();
         roomListDisplay.SetActive(hasRoomsAvailable);
         loadingAnimation.SetActive(!hasRoomsAvailable);
-
-        if(hasRoomsAvailable)
-            RemoveUnavailableRooms();
     }
 
     private bool CheckIfRoomIsBanned(RoomInfo room)
@@ -109,9 +106,19 @@ public class RoomSelectionPanel : MonoBehaviourPunCallbacks
     private void AddRoomToList(RoomInfo room)
     {
         if (CheckIfRoomIsBanned(room)) return;
-        if (CheckRoomIsInCurrentList(room)) return;
+        if (CheckRoomIsInCurrentList(room))
+        {
+            for (int i = 0; i < currentRoomList.Count; i++)
+            {
+                if (room.Equals(currentRoomList[i]))
+                    currentRoomList[i] = room;
+            }
+        }
+        else
+        {
+            currentRoomList.Add(room);
+        }
 
-        currentRoomList.Add(room);
     }
 
     private void RemoveUnavailableRooms()
@@ -119,10 +126,16 @@ public class RoomSelectionPanel : MonoBehaviourPunCallbacks
         for (int i = currentRoomList.Count - 1; i >= 0; i--)
         {
             var room = currentRoomList[i];
-            if (!room.IsOpen || !room.IsVisible || room.PlayerCount >= room.MaxPlayers)
-                currentRoomList.Remove(room);
+            RemoveUnavailableRoom(room);
         }
     }
+
+    private void RemoveUnavailableRoom(RoomInfo room)
+    {
+        if (!room.IsOpen || !room.IsVisible || room.PlayerCount >= room.MaxPlayers)
+            currentRoomList.Remove(room);
+    }
+
 
     private bool CheckRoomIsInCurrentList(RoomInfo room)
     {
@@ -132,7 +145,15 @@ public class RoomSelectionPanel : MonoBehaviourPunCallbacks
     private void RoomReceived(RoomInfo room)
     {
         if (room.IsVisible && room.PlayerCount < room.MaxPlayers)
+        {
             AddRoomToList(room);
+        }
+        else
+        {
+            if (CheckRoomIsInCurrentList(room))
+                RemoveUnavailableRoom(room);
+        }
+
     }
 
     private void RefreshRoomListDisplayed()
@@ -155,9 +176,11 @@ public class RoomSelectionPanel : MonoBehaviourPunCallbacks
 
     private void SetRoomNameInfo(RoomInfo room, int index)
     {
-        currentRoomButtons[index].nameTxt.text = room.Name;
-        currentRoomButtons[index].numberTxt.text = $"{room.PlayerCount} / {room.MaxPlayers} ";
-        currentRoomButtons[index].joinButton.onClick.AddListener(() => OnClickRoom(room.Name));
+        RoomDisplay currentDisplay = currentRoomButtons[index];
+        currentDisplay.nameTxt.text = room.Name;
+        currentDisplay.numberTxt.text = $"{room.PlayerCount} / {room.MaxPlayers} ";
+        currentDisplay.RoomInfo = room;
+        currentDisplay.joinButton.onClick.AddListener(() => OnClickRoom(currentDisplay));
     }
 
     private void AddNewRoom(int roomsToAdd)
@@ -169,9 +192,14 @@ public class RoomSelectionPanel : MonoBehaviourPunCallbacks
             currentRoomButtons.Add(aux);
         }
     }
-    private void OnClickRoom(string roomName)
+    private void OnClickRoom(RoomDisplay roomDisplay)
     {
-        if (PhotonNetwork.JoinRoom(roomName))
+        if (!roomDisplay.RoomInfo.IsOpen)
+        {
+            mainMenu.SetStatus($"Room {roomDisplay.RoomInfo.Name} is full");
+            return;
+        }
+        if (PhotonNetwork.JoinRoom(roomDisplay.RoomInfo.Name))
         {
             mainMenu.SetStatus("Player Joined in the Room");
             return;

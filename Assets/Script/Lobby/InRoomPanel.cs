@@ -27,6 +27,7 @@ public class InRoomPanel : MonoBehaviourPunCallbacks
     private List<PlayerDisplay> playerButtons = new List<PlayerDisplay>();
     private Dictionary<string, int> playerNames = new Dictionary<string, int>();
     private Player[] currentPlayerList;
+    private bool roomOpen;
 
     void Awake()
     {
@@ -151,8 +152,7 @@ public class InRoomPanel : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        PhotonNetwork.CurrentRoom.IsOpen = false;
-        PhotonNetwork.CurrentRoom.IsVisible = false;
+        CloseRoom();
         mainMenu.ClearData();
         PhotonNetwork.LoadLevel(mainMenu.Level);
     }
@@ -188,11 +188,41 @@ public class InRoomPanel : MonoBehaviourPunCallbacks
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         RefreshPlayerList();
+        UpdateRoomFullness();
+
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         RefreshPlayerList();
+        UpdateRoomFullness();
+    }
+
+    public void UpdateRoomFullness()
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        if (PhotonNetwork.CurrentRoom.MaxPlayers == PhotonNetwork.CurrentRoom.PlayerCount)
+            CloseRoom();
+        else
+            OpenRoom();
+
+    }
+
+    public void OpenRoom()
+    {
+        if (roomOpen) return;
+        roomOpen = true;
+        PhotonNetwork.CurrentRoom.IsVisible = true;
+        PhotonNetwork.CurrentRoom.IsOpen = true;
+    }
+
+    public void CloseRoom()
+    {
+        if (!roomOpen) return;
+        roomOpen = false;
+        PhotonNetwork.CurrentRoom.IsVisible = false;
+        PhotonNetwork.CurrentRoom.IsOpen = false;
     }
 
     private void OnApplicationQuit()

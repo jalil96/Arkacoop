@@ -152,7 +152,10 @@ public class MainMenuManager : MonoBehaviourPunCallbacks
     private void QuickMatchCheat()
     {
         ChangePanel(loadingSymbolPanel);
+        
         PhotonNetwork.NickName = DEFAULT_NICK_NAME;
+        txtNickname.gameObject.SetActive(true);
+        txtNickname.text = PhotonNetwork.NickName;
 
         PhotonNetwork.ConnectUsingSettings();
 

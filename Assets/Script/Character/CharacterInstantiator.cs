@@ -14,9 +14,7 @@ public class CharacterInstantiator : MonoBehaviourPunCallbacks
    
     private void Start()
     {
-        if (!PhotonNetwork.IsMasterClient) return; // Only instantiate character if I'm the MasterClient
-        var spawn = GetAvailableSpawnPoint();
-        InstantiateCharacter(spawn);
+        photonView.RPC(nameof(SendEnteredPlayer), RpcTarget.MasterClient, PhotonNetwork.LocalPlayer);
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
@@ -35,6 +33,12 @@ public class CharacterInstantiator : MonoBehaviourPunCallbacks
         if(!PhotonNetwork.IsMasterClient) return;
         var spawn = _spawns.Find((spawn) => spawn.PlayerReference.Equals(otherPlayer));
         spawn.SetOccupied(false);
+    }
+    
+    [PunRPC]
+    private void SendEnteredPlayer(Player player)
+    {
+        OnPlayerEnteredRoom(player);
     }
     
     [PunRPC]

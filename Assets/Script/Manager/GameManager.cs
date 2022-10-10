@@ -40,8 +40,9 @@ public class GameManager : MonoBehaviourPunCallbacks
          _startScreen.SetActive(true);
         _startMessage.text = _waitingMessage;
 
+        photonView.RPC(nameof(SendEnteredPlayer), RpcTarget.MasterClient, PhotonNetwork.LocalPlayer);
+        
         if (!PhotonNetwork.IsMasterClient) return;
-        OnPlayerEnteredRoom(PhotonNetwork.LocalPlayer);
         _bricks = FindObjectsOfType<BrickModel>().ToList();
 
         foreach (var brick in _bricks)
@@ -50,8 +51,16 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    [PunRPC]
+    private void SendEnteredPlayer(Player player)
+    {
+        OnPlayerEnteredRoom(player);
+    }
+
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
+        Debug.Log($"New player entered: {newPlayer.NickName}");
+        
         _activePlayers++;
         _readyToPlay = (_activePlayers + 1) >= PhotonNetwork.CurrentRoom.PlayerCount; //we add one because the host doesn't add itself
 

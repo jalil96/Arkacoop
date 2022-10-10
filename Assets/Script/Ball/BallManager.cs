@@ -1,22 +1,50 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
+using UnityEditor.Timeline.Actions;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
-public class BallManager : MonoBehaviour
+public class BallManager : MonoBehaviourPun
 {
-
-    // [SerializeField] private GameObject _ballPrefab;
     [SerializeField] private List<Transform> _ballSpawnPoints;
+    [Range(1,12)][SerializeField] private int _maxBallsInScreen;
+    [SerializeField] private float _timeBetweenSpawning;
     
+    [SerializeField] private List<BallModel> _activeBalls;
+    [SerializeField] private GameManager _gameManager;
     
+    private void Start()
+    {
+        if(!PhotonNetwork.IsMasterClient) Destroy(this);
+        InvokeRepeating(nameof(SpawnBall), 0, _timeBetweenSpawning);
+        _gameManager.OnGameStarted += SpawnBall;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            var spawn = _ballSpawnPoints[Random.Range(0, _ballSpawnPoints.Count)];
+            var position = spawn.position;
+            var rotation = spawn.rotation;
+            var ball = PhotonNetwork.Instantiate("Ball", position, rotation);
+            _activeBalls.Add(ball.GetComponent<BallModel>());
+        }
+    }
+
     public void SpawnBall()
     {
+        _activeBalls = _activeBalls.FindAll(ball => ball != null);
+        _maxBallsInScreen = PhotonNetwork.CountOfPlayers;
+        if (_activeBalls.Count >= _maxBallsInScreen) return;
+        
         var spawn = _ballSpawnPoints[Random.Range(0, _ballSpawnPoints.Count)];
         var position = spawn.position;
         var rotation = spawn.rotation;
-        PhotonNetwork.Instantiate("Ball", position, rotation);
-        
+        var ball = PhotonNetwork.Instantiate("Ball", position, rotation);
+        _activeBalls.Add(ball.GetComponent<BallModel>());
     }
     
 }

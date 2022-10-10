@@ -13,6 +13,8 @@ using System.Collections;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
+    public Action OnGameStarted = delegate {  };
+    
     [SerializeField] private GameObject _loseScreen;
     [SerializeField] private GameObject _winScreen;
     [SerializeField] private GameObject _startScreen;
@@ -87,24 +89,13 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.IsMasterClient) return;
         if (Input.GetButtonDown("Submit"))
             StartCountDown();
-        if (Input.GetKeyDown(KeyCode.F3))
-        {
-            var obj = PhotonNetwork.Instantiate("Ball", Vector3.zero, Quaternion.identity);
-        }
+        
     }
 
     private void StartGame()
     {
         Debug.Log($"Ready to play: {_readyToPlay}");
         if (!_readyToPlay) return;
-        var obj = PhotonNetwork.Instantiate("Ball", Vector3.zero, Quaternion.identity);
-        var ball = obj.GetComponent<BallModel>();
-
-        if (ball != null)
-        {
-            // Hacer algo?
-        }
-
         if (_gameStarted) return;
         
         _gameStarted = true;
@@ -115,6 +106,8 @@ public class GameManager : MonoBehaviourPunCallbacks
             SetNewCharacter(character);
         }
         _timerController.StartTimer();
+        
+        OnGameStarted.Invoke();
         
         photonView.RPC(nameof(ShowStartScreen), RpcTarget.All, false);
     }

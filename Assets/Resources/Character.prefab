@@ -41,6 +41,7 @@ GameObject:
   - component: {fileID: 7734756473892371614}
   - component: {fileID: 4001052268282439860}
   - component: {fileID: 4158247455568434444}
+  - component: {fileID: 878574665835388697}
   m_Layer: 0
   m_Name: WallOfDeath
   m_TagString: Untagged
@@ -100,6 +101,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59dc82388326493698179bd0dc2a182f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &878574665835388697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5813788414714531915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &6050054728476522295
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,20 +1,26 @@
 ﻿using System;
+using Photon.Pun;
 using UnityEngine;
 
 
-public class CharacterWallOfDeath : MonoBehaviour
+public class CharacterWallOfDeath : MonoBehaviourPun
 {
     public Action OnBallEnter = delegate {  };
     
-        
-    
     private void OnTriggerEnter2D(Collider2D col)
     {
+        if (!PhotonNetwork.IsMasterClient) return;
         var ball = col.gameObject.GetComponent<BallModel>();
         if (ball != null)
         {
-            OnBallEnter.Invoke();
+            photonView.RPC(nameof(BallEnter), photonView.Owner);
         }
+    }
+
+    [PunRPC]
+    private void BallEnter()
+    {
+        OnBallEnter.Invoke();
     }
     
 }

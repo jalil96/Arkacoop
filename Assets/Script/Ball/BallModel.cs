@@ -26,7 +26,7 @@ public class BallModel : MonoBehaviourPun
     private void Start()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
-        if (!photonView.IsMine) photonView.RPC(nameof(RequestSpawning), photonView.Owner, PhotonNetwork.LocalPlayer);
+        // if (!photonView.IsMine) photonView.RPC(nameof(RequestSpawning), photonView.Owner, PhotonNetwork.LocalPlayer);
     }
 
     public void InitDirection()

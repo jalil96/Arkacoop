@@ -178,6 +178,8 @@ public class InRoomPanel : MonoBehaviourPunCallbacks
                 if (!currentPlayerList[i].IsMasterClient)
                     OnKickPlayer(currentPlayerList[i]);
             }
+
+            CloseRoom();
         }
 
         PhotonNetwork.LeaveRoom(false);

@@ -56,6 +56,11 @@ public class BallModel : MonoBehaviourPun
         // Debug.Log($"Direction before rotation {_direction} by angle: {angle}");
     }
 
+    public void ReflectDirection(float angle = 0)
+    {
+        _direction *= -1;
+    }
+
     public void Die()
     {
         OnDie.Invoke(this);

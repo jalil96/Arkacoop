@@ -9,6 +9,10 @@ public class BallController : MonoBehaviourPun
     [SerializeField] private int _pointsOnCollision = 50;
     [SerializeField] private int _pointsOnBreak = 100;
     [SerializeField] private float _spawningDuration = 2f;
+
+    [SerializeField] private Vector2 _lastPosition;
+    [SerializeField] private float _minTraveledDistance;
+    [SerializeField] private float _traveledDistance;
     
     private BallModel _ballModel;
     
@@ -23,14 +27,28 @@ public class BallController : MonoBehaviourPun
         _ballModel = GetComponent<BallModel>();
         _ballModel.InitDirection();
         Invoke(nameof(StopSpawning), _spawningDuration);
+        // InvokeRepeating(nameof(CheckTraveledDistance), 0, 3f);
+        InvokeRepeating(nameof(CheckStuck), 0, 3f);
     }
 
     private void Update()
     {
-        if (_ballModel.Spawning) return; 
+        if (_ballModel.Spawning) return;
         _ballModel.Move();
+        _traveledDistance += Vector2.Distance(transform.position, _lastPosition);
+        _lastPosition = transform.position;
     }
 
+    private void CheckStuck()
+    {
+        if (_traveledDistance <= _minTraveledDistance && !_ballModel.Spawning)
+        {
+            _ballModel.LastCollision = null;
+            _ballModel.ReflectDirection();
+        }
+        _traveledDistance = 0;
+    }
+    
     private void StopSpawning()
     {
         _ballModel.StopSpawning();

@@ -109,6 +109,9 @@ MonoBehaviour:
   _pointsOnCollision: 50
   _pointsOnBreak: 100
   _spawningDuration: 2
+  _lastPosition: {x: 0, y: 0}
+  _minTraveledDistance: 10
+  _traveledDistance: 0
 --- !u!114 &2664592978094690309
 MonoBehaviour:
   m_ObjectHideFlags: 0
